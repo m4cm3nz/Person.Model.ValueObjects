@@ -1,5 +1,5 @@
 # Person.Model.ValueObjects
-A collection of value objects that intent to model brazilian's Person domain
+A collection of value objects that intent to model some brazilian's Person domain properties
 
 ### Employer Identification Number 
 CNPJ - Cadastro Nacional de Pessoa Jurídica  
