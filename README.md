@@ -7,10 +7,10 @@ A string based struct that models a Employer Number Identification
 
 ### Creation
 ```c#
-//with new operator
+// with new operator
 var cnpj = new CNPJ("39612247000102");
 
-//with string implicity operator
+// with string implicity operator
 CNPJ cnpj = "39612247000102";
 ```
 
@@ -32,11 +32,11 @@ CNPJ cnpj = "39612247000102";
 ```c#
  CNPJ cnpj = "39612247000102";
 
-//with ToString method
+// with ToString method
 console.log(cnpj.ToString());
 # 39.612.247\0001-02
 
-//with string implicity operator
+// with string implicity operator
 console.log(cnpj);
 # 39.612.247\0001-02
 ```
