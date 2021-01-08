@@ -106,7 +106,7 @@ CPF cpf = "99194415030";
 
 ### Formatting
 ```c#
- CPF cpf = "99194415030";
+CPF cpf = "99194415030";
 
 // with ToString method
 console.log(cpf.ToString());
