@@ -78,7 +78,7 @@ CNPJ.GetCheckNumberFrom("39612247000102");
 ```
 
 ### Social Security Number
-CPF - Cadastro de Pessoa Física
+CPF - Cadastro de Pessoa Física  
 A string based struct that models the brazilian's Social Security Number  
 
 ### Creation
