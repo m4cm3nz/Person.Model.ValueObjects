@@ -2,7 +2,7 @@
 Values objects that intent to model brazilian's Person domain
 Implements validation, formatting and implicity operators for common types
 
-## CNPJ - Cadastro Nacional de Pessoa Jurídica 
+### CNPJ - Cadastro Nacional de Pessoa Jurídica 
 A string based struct that models a Employer Number Identification
 
 ### Creation
@@ -68,11 +68,11 @@ CNPJ.IsOutOfRange("39 12247A00102");
 CNPJ.IsValid("39612247000102");
 # true
 
-// get number part of cnpj candidate
+// get number part of cnpj in range candidate
 CNPJ.GetNumberFrom("39612247000102");
 # 396122470001
 
-// get check number part of cnpj candidate
+// get check number part of in range cnpj candidate
 CNPJ.GetCheckNumberFrom("39612247000102");
 # 02
 ```
