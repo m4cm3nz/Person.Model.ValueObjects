@@ -3,7 +3,7 @@ A collection of value objects that intent to model brazilian's Person domain
 
 ### Employer Identification Number 
 CNPJ - Cadastro Nacional de Pessoa Jurídica  
-A string based struct that models the brazilian Employer Identification Number
+A string based struct that models the brazilian's Employer Identification Number
 
 ### Creation
 ```c#
