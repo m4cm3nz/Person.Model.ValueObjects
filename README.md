@@ -5,7 +5,7 @@ A collection of value objects that intent to model some brazilian's Person domai
 CNPJ - Cadastro Nacional de Pessoa Jurídica  
 A string based struct that models the brazilian's Employer Identification Number
 
-### Creation
+### CNPJ - Creation
 ```c#
 // with new operator
 var cnpj = new CNPJ("39612247000102");
@@ -14,7 +14,7 @@ var cnpj = new CNPJ("39612247000102");
 CNPJ cnpj = "39612247000102";
 ```
 
-### Dismembering
+### CNPJ - Dismembering
 ```c#
  CNPJ cnpj = "39612247000102";
  
@@ -28,7 +28,7 @@ CNPJ cnpj = "39612247000102";
  # 02
 ```
 
-### Formatting
+### CNPJ - Formatting
 ```c#
  CNPJ cnpj = "39612247000102";
 
@@ -41,7 +41,7 @@ console.log(cnpj);
 # 39.612.247\0001-02
 ```
 
-### Helper Functions
+### CNPJ - Helper Functions
 ```c#
 // non-numeric
 CNPJ.IsNumeric("39 12247A00102");
@@ -81,7 +81,7 @@ CNPJ.GetCheckNumberFrom("39612247000102");
 CPF - Cadastro de Pessoa Física  
 A string based struct that models the brazilian's Social Security Number  
 
-### Creation
+### CPF - Creation
 ```c#
 // with new operator
 var cpf = new CPF("99194415030");
@@ -90,7 +90,7 @@ var cpf = new CPF("99194415030");
 CPF cpf = "99194415030";
 ```
 
-### Dismembering
+### CPF - Dismembering
 ```c#
  CPF cpf = "99194415030";
  
@@ -104,7 +104,7 @@ CPF cpf = "99194415030";
  # 30
 ```
 
-### Formatting
+### CPF - Formatting
 ```c#
 CPF cpf = "99194415030";
 
@@ -117,7 +117,7 @@ console.log(cpf);
 # 991.944.150-30
 ```
 
-### Helper Functions
+### CPF - Helper Functions
 ```c#
 // non-numeric
 CPF.IsNumeric("991 94 415 030");
