@@ -1,6 +1,5 @@
 # Person.Model.ValueObjects
 Values objects that intent to model brazilian's Person domain
-Implements validation, formatting and implicity operators for common types
 
 ### CNPJ - Cadastro Nacional de Pessoa Jurídica 
 A string based struct that models a Employer Number Identification
