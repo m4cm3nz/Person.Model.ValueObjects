@@ -47,7 +47,7 @@ console.log(cnpj);
 CNPJ.IsNumeric("39 12247A00102");
 # false
 
-// not forteen size length
+// not fourteen size length
 CNPJ.IsFourteenLength("396122470001020000");
 # false
 
