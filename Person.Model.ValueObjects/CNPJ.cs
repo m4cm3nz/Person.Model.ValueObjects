@@ -14,8 +14,8 @@ namespace Person.Model.ValueObjects
         private static readonly int CnpjLength = CheckNumberLength + NumberLength;
 
         private string Raw => Number + CheckNumber;
-        public string Number { get; set; }
-        public string CheckNumber { get; set; }
+        public string Number { get; private set; }
+        public string CheckNumber { get; private set; }
 
         public static implicit operator string(CNPJ number) => number.Raw;
 

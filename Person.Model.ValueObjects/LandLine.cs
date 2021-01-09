@@ -23,10 +23,10 @@ namespace Person.Model.ValueObjects
         public static string GetOnlyNumbersFrom(string value) =>
            string.Join(null, Regex.Matches(value, @"[0-9]+"));
 
-        public string Raw { get; set; }
-        public string CountryCode { get; set; }
-        public string AreaCode { get; set; }
-        public string Number { get; set; }
+        public string Raw { get; private set; }
+        public string CountryCode { get; private set; }
+        public string AreaCode { get; private set; }
+        public string Number { get; private set; }
 
         public override string ToString()
         {

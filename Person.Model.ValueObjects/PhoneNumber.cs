@@ -2,9 +2,9 @@
 {
     public interface PhoneNumber
     {
-        string Raw { get; set; }
-        string CountryCode { get; set; }
-        string AreaCode { get; set; }
-        string Number { get; set; }
+        string Raw { get; }
+        string CountryCode { get; }
+        string AreaCode { get; }
+        string Number { get; }
     }
 }

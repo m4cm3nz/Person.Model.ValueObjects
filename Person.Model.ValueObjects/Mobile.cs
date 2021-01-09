@@ -28,10 +28,10 @@ namespace Person.Model.ValueObjects
             return $"+{CountryCode} ({AreaCode} {Number.Substring(0, 5)} {Number.Substring(5, 4)})";
         }
 
-        public string Raw { get; set; }
-        public string CountryCode { get; set; }
-        public string AreaCode { get; set; }
-        public string Number { get; set; }
+        public string Raw { get; private set; }
+        public string CountryCode { get; private set; }
+        public string AreaCode { get; private set; }
+        public string Number { get; private set; }
 
         public Mobile(string phoneNumber)
         {
