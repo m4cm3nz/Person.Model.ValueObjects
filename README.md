@@ -159,7 +159,7 @@ CPF.GetCheckNumberFrom("99194415030");
 # 30
 ```
 
-## Land Line Number
+## Land Line Phone Number
 A string-based struct that models the Brazilian's Land Line in ANATEL's standard format
 
 ### Land Line - Creation
@@ -176,7 +176,7 @@ LandLine? landLine = null;
 // accept mutiple formats on creation
 // all the signs and spaces are optional
 // it does not accept double spaces.
-// @"^(\+?55 ?)? ?(\([1-9]{2}\)|[1-9]{2}) ?([2-5]\d{3}[-| ]?\d{4})$"
+// ^(\+?55 ?)? ?(\([1-9]{2}\)|[1-9]{2}) ?([2-5]\d{3}[-| ]?\d{4})$
 
 LandLine landLine = "+55(51)2635-2520";
 LandLine landLine = "+55 (51) 2635-2520";
@@ -198,4 +198,45 @@ LandLine landLine = "55 51 2635 2520";
 
 console.log(landLine.Number);
 # 26352520
+```
+
+## Mobile Phone Number
+A string-based struct that models the Brazilian's Mobile in ANATEL's standard format
+
+### Mobile - Creation
+```c#
+// with new operator
+var mobile = new Mobile("51932321078");
+
+// with string implicity operator
+Mobile mobile = "51932321078";
+
+// can be null
+Mobile? mobile = null;
+
+// accept mutiple formats on creation
+// all the signs and spaces are optional
+// it does not accept double spaces.
+// ^(\+?55 ?)? ?(\([1-9]{2}\)|[1-9]{2}) ?(9\d{4}[-| ]?\d{4})$
+
+Mobile mobile = "+55(51)93232-1078";
+Mobile mobile = "+55 (51) 93232-1078";
+Mobile mobile = "55 51 93232 1078";
+```
+
+### Mobile - Dismembering
+```c#
+ Mobile mobile = "5551932321078";
+ 
+ console.log(mobile.Raw);
+ # 5551932321078
+ 
+ console.log(mobile.CountryCode);
+ # 55
+ 
+ console.log(mobile.AreaCode);
+ # 51
+
+console.log(mobile.Number);
+# 932321078
 ```
