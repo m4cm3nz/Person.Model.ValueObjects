@@ -12,6 +12,9 @@ var cnpj = new CNPJ("39612247000102");
 
 // with string implicity operator
 CNPJ cnpj = "39612247000102";
+
+// can be nullable
+CNJP? cnpj = null;
 ```
 
 ### CNPJ - Dismembering
@@ -88,6 +91,9 @@ var cpf = new CPF("99194415030");
 
 // with string implicity operator
 CPF cpf = "99194415030";
+
+// can be nullable
+CPF? cpf = null;
 ```
 
 ### CPF - Dismembering
