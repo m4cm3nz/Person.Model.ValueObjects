@@ -172,6 +172,15 @@ LandLine landLine = "5126352520";
 
 // can be null
 LandLine? landLine = null;
+
+// accept mutiple formats on creation
+// all the signs and spaces are optional
+// it does not accept double spaces.
+// @"^(\+?55 ?)? ?(\([1-9]{2}\)|[1-9]{2}) ?([2-5]\d{3}[-| ]?\d{4})$"
+
+LandLine landLine = "+55(51)2635-2520";
+LandLine landLine = "+55 (51) 2635-2520";
+LandLine landLine = "55 51 2635 2520";
 ```
 
 ### Land Line - Dismembering
@@ -188,5 +197,5 @@ LandLine? landLine = null;
  # 51
 
 console.log(landLine.Number);
- # 26352520
+# 26352520
 ```
