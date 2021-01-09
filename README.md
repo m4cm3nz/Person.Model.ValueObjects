@@ -1,5 +1,5 @@
 # Person.Model.ValueObjects
-A .NET Standard 2.1 collection with value objects that intent to model some Brazilian's Person domain properties
+A .NET Standard 2.1 collection with value objects that intend to model some Brazilian's Person domain properties
 
 ## Employer Identification Number 
 CNPJ - Cadastro Nacional de Pessoa Jurídica  
