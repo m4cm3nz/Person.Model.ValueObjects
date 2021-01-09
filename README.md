@@ -162,7 +162,31 @@ CPF.GetCheckNumberFrom("99194415030");
 ## Land Line Number
 A string-based struct that models the Brazilian's Land Line in ANATEL's standard format
 
-### CPF - Creation
+### Land Line - Creation
 ```c#
-var landLine = new LandLine("")
+// with new operator
+var landLine = new LandLine("5126352520");
+
+// with string implicity operator
+LandLine landLine = "5126352520";
+
+// can be null
+LandLine? landLine = null;
+```
+
+### Land Line - Dismembering
+```c#
+ LandLine landLine = "555126352520";
+ 
+ console.log(landLine.Raw);
+ # 555126352520
+ 
+ console.log(landLine.CountryCode);
+ # 55
+ 
+ console.log(landLine.AreaCode);
+ # 51
+
+console.log(landLine.Number);
+ # 26352520
 ```
