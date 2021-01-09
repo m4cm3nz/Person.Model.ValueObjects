@@ -160,7 +160,7 @@ CPF.GetCheckNumberFrom("99194415030");
 ```
 
 ## Land Line Phone Number
-A string-based struct that models the Brazilian's Land Line in ANATEL's standard format
+A string-based struct that models the Brazilian's land line phone number in ANATEL's standard format
 
 ### Land Line - Creation
 ```c#
@@ -201,7 +201,7 @@ console.log(landLine.Number);
 ```
 
 ## Mobile Phone Number
-A string-based struct that models the Brazilian's Mobile in ANATEL's standard format
+A string-based struct that models the Brazilian's mobile phone number in ANATEL's standard format
 
 ### Mobile - Creation
 ```c#
