@@ -1,7 +1,7 @@
 # Person.Model.ValueObjects
 A .NET Standard 2.1 collection of value objects that intent to model some brazilian's Person domain properties
 
-### Employer Identification Number 
+## Employer Identification Number 
 CNPJ - Cadastro Nacional de Pessoa Jurídica  
 A string based struct that models the brazilian's Employer Identification Number
 
@@ -80,7 +80,7 @@ CNPJ.GetCheckNumberFrom("39612247000102");
 # 02
 ```
 
-### Social Security Number
+## Social Security Number
 CPF - Cadastro de Pessoa Física  
 A string based struct that models the brazilian's Social Security Number  
 
