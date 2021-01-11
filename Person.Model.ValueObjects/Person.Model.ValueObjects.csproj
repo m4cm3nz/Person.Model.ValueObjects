@@ -5,8 +5,12 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Rafael Mac Menz</Authors>
     <Company>McMenz IT</Company>
-    <Description>Object values of brazilian Person domain model</Description>
+    <Description>A .NET Standard 2.1 collection with value objects that intend to model some Brazilian's Person domain properties</Description>
     <NeutralLanguage>pt-BR</NeutralLanguage>
+    <RepositoryUrl>https://github.com/m4cm3nz/Person.Model.ValueObjects</RepositoryUrl>
+    <RepositoryType>c#</RepositoryType>
+    <PackageTags>value-object cnpj cpf mobile landline person</PackageTags>
+    <PackageReleaseNotes>Versão inicial</PackageReleaseNotes>
   </PropertyGroup>
 
 </Project>
