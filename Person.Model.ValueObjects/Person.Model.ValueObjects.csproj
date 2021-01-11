@@ -11,6 +11,8 @@
     <RepositoryType>c#</RepositoryType>
     <PackageTags>value-object cnpj cpf mobile landline person</PackageTags>
     <PackageReleaseNotes>Versão inicial</PackageReleaseNotes>
+    <Copyright />
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
 </Project>
