@@ -1,7 +1,7 @@
 # Person.Model.ValueObjects
 A .NET Standard 2.1 collection with value objects that intend to model some Brazilian's Person domain properties
 
-## Build your domain model using these value objects can save a lot of time and be very useful.
+### Build your domain model using some value objects can save a lot of time and be very useful:
 ```c#
 
 public class Company {
