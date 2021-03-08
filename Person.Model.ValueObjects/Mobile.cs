@@ -29,7 +29,7 @@ namespace Person.Model.ValueObjects
         }
 
         public string Raw { get; private set; }
-        public string CountryCode { get; private set; }
+        public string CountryCode { get; set; }
         public string AreaCode { get; private set; }
         public string Number { get; private set; }
 
