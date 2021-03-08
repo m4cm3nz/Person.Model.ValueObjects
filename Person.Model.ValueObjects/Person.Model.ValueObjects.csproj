@@ -10,7 +10,7 @@
     <RepositoryUrl>https://github.com/m4cm3nz/Person.Model.ValueObjects</RepositoryUrl>
     <RepositoryType>c#</RepositoryType>
     <PackageTags>value-object cnpj cpf mobile landline person</PackageTags>
-    <PackageReleaseNotes>First release with CNPJ, CPF, Mobile, and LandLine value objects.</PackageReleaseNotes>
+    <PackageReleaseNotes>Added Text.Json support to deserialization</PackageReleaseNotes>
     <Copyright />
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
