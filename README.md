@@ -1,6 +1,39 @@
 # Person.Model.ValueObjects
 A .NET Standard 2.1 collection with value objects that intend to model some Brazilian's Person domain properties
 
+### Build your domain model using some value objects can save a lot of time and be very useful:
+```c#
+
+public class Company {
+  public CNPJ CNPJ { get; set; }
+  public LandLine LandLine { get; set; }
+}
+
+var company = new Company {
+  CNPJ = "39612247000102",
+  LandLine = "5136350020"
+};
+
+console.log(company.CNPJ);
+# 39.612.247/0001-02
+
+console.log(company.CNPJ.Number);
+# 396122470001
+
+console.log(company.CNPJ.CheckNumber);
+# 02
+
+console.log(company.LandLine);
+# +55 (51) 3635-0020
+
+console.log(company.LandLine.AreaCode);
+# 51
+
+console.log(company.LandLine.Number);
+# 36350020
+
+```
+
 ## Employer Identification Number 
 CNPJ - Cadastro Nacional de Pessoa Jurídica  
 A string-based struct that models the Brazilian's Employer Identification Number
