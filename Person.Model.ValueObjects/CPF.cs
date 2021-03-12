@@ -31,7 +31,7 @@ namespace Person.Model.ValueObjects
 
             if (!Internal.IsValid(number))
                 throw new InvalidCastException(
-                    "A cadeia de caracteres informada não corresponde a um number válido.");
+                    "A cadeia de caracteres informada não corresponde a um CPF válido.");
 
             Number = Internal.GetNumberFrom(number);
             CheckNumber = Internal.GetCheckNumberFrom(number);
@@ -46,7 +46,7 @@ namespace Person.Model.ValueObjects
         {
             if (number == null)
                 throw new ArgumentNullException(nameof(number),
-                    "Não é possível criar um number a partir de um valor nulo.");
+                    "Não é possível criar um CPF a partir de um valor nulo.");
 
             if (IsOutOfRange(number))
                 throw new ArgumentOutOfRangeException(
