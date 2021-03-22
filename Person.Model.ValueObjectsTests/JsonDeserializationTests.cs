@@ -17,8 +17,16 @@ namespace Person.Model.ValueObjectsTests
     }
 
     [TestFixture]
-    public class MobileTextJsonDeserializationTests
+    public class JsonDeserializationTests
     {
+        public string SerializeWith<T>(dynamic dummy)
+            where T : JsonConverter, new()
+        {
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new T());
+            return JsonSerializer.Serialize(dummy, options);
+        }
+
         [Test]
         public void ShouldBeAbleToDeserializeMobileAndLandlineUsingTextJson()
         {
@@ -27,7 +35,7 @@ namespace Person.Model.ValueObjectsTests
             {
                 Name = "Rafael",
                 Mobile = "51985680052",
-                LandLine = "5136350102"
+                LandLine = "5136350102",
             };
 
             var stream = JsonSerializer.Serialize(dummyObject);
@@ -37,6 +45,5 @@ namespace Person.Model.ValueObjectsTests
             Assert.That(newDummy.Mobile, Is.EqualTo(dummyObject.Mobile));
             Assert.That(newDummy.LandLine, Is.EqualTo(dummyObject.LandLine));
         }
-
     }    
 }
