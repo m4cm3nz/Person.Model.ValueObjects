@@ -9,20 +9,11 @@ namespace Person.Model.ValueObjects
         {
             var numericMonthYear =  Regex.Replace(monthYear, "[^.0-9]", "");
 
-            if (!Regex.IsMatch(numericMonthYear, @"(0[1-9]|1[0-2])(19|2[0-1])\d{2}$"))
-                throw new ArgumentException("Invalid month/year");
+            if (!IsValid(numericMonthYear))
+                throw new ArgumentException("MonthOfYear should be a valid month/year value pair argument.");
 
             Month = short.Parse(numericMonthYear[0..2]);
             Year = short.Parse(numericMonthYear[2..6]);
-        }
-
-        public MonthOfYear(string month, string year)
-        {
-            if (!IsValid(month, year))
-                throw new ArgumentException("MonthOfYear should be a valid month/year value pair argument.");
-
-            Month = short.Parse(month);
-            Year = short.Parse(year);
         }
 
         public short Month { get; private set; }
@@ -44,12 +35,9 @@ namespace Person.Model.ValueObjects
             return $"{Month:00}/{Year}";
         }
 
-        public static bool IsValid(string month, string year)
+        public static bool IsValid(string monthYear)
         {
-            var validMonth = DateTime.TryParse($"{DateTime.Today.Year}-{month}-01", out _);
-            var validYear = DateTime.TryParse($"{year}-{month}-01", out _);
-
-            return validMonth && validYear;
+            return Regex.IsMatch(monthYear, @"(0[1-9]|1[0-2])(19|2[0-1])\d{2}$");
         }
     }
 }
