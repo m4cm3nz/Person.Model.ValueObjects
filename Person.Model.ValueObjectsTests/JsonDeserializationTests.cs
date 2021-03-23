@@ -1,7 +1,6 @@
 ﻿using NUnit.Framework;
 using Person.Model.ValueObjects;
 using Person.Model.ValueObjects.Json;
-using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -19,18 +18,9 @@ namespace Person.Model.ValueObjectsTests
     [TestFixture]
     public class JsonDeserializationTests
     {
-        public string SerializeWith<T>(dynamic dummy)
-            where T : JsonConverter, new()
-        {
-            var options = new JsonSerializerOptions();
-            options.Converters.Add(new T());
-            return JsonSerializer.Serialize(dummy, options);
-        }
-
         [Test]
         public void ShouldBeAbleToDeserializeMobileAndLandlineUsingTextJson()
         {
-
             var dummyObject = new DummyObject
             {
                 Name = "Rafael",
@@ -45,5 +35,5 @@ namespace Person.Model.ValueObjectsTests
             Assert.That(newDummy.Mobile, Is.EqualTo(dummyObject.Mobile));
             Assert.That(newDummy.LandLine, Is.EqualTo(dummyObject.LandLine));
         }
-    }    
+    }
 }

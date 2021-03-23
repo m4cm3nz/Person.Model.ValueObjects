@@ -6,7 +6,7 @@ namespace Person.Model.ValueObjects
     {
         readonly string number;
 
-        private CardNumber(string number)
+        public CardNumber(string number)
         {
             if (!IsValid(number))
                 throw new ArgumentException("Número do cartão inválido.");

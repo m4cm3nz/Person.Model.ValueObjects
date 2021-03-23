@@ -10,13 +10,13 @@
     <RepositoryUrl>https://github.com/m4cm3nz/Person.Model.ValueObjects</RepositoryUrl>
     <RepositoryType>c#</RepositoryType>
     <PackageTags>value-object cnpj cpf mobile landline person</PackageTags>
-    <PackageReleaseNotes>Added Text.Json support to deserialization</PackageReleaseNotes>
+    <PackageReleaseNotes>Added Text.Json CardNumberConverter</PackageReleaseNotes>
     <Copyright />
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageProjectUrl>https://github.com/m4cm3nz/Person.Model.ValueObjects</PackageProjectUrl>
-    <Version>1.0.1</Version>
-    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <Version>1.0.3</Version>
+    <AssemblyVersion>1.0.3.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

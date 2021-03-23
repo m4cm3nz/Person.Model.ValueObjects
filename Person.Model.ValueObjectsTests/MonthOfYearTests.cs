@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace Person.Model.ValueObjectsTests
 {
-    public class Dummy
+    public class DummyDate
     {
         public MonthOfYear? MonthOfYear { get; set; }
     }
@@ -38,7 +38,7 @@ namespace Person.Model.ValueObjectsTests
         [TestCase("05x2022")]
         public void ShouldBeAbleToDeserializeValidMonthOfYearWithConverterOptions(string monthOfYear)
         {
-            var dummy = new Dummy
+            var dummy = new DummyDate
             {
                 MonthOfYear = monthOfYear
             };
@@ -48,7 +48,7 @@ namespace Person.Model.ValueObjectsTests
 
             var json = JsonSerializer.Serialize(dummy, options);
 
-            var newDummy = JsonSerializer.Deserialize<Dummy>(json, options);
+            var newDummy = JsonSerializer.Deserialize<DummyDate>(json, options);
 
             Assert.That(newDummy.MonthOfYear, Is.EqualTo(dummy.MonthOfYear));
         }
