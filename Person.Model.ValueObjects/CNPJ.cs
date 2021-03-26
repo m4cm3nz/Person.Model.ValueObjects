@@ -34,7 +34,7 @@ namespace Person.Model.ValueObjects
 
             if (!Internal.IsValid(number))
                 throw new InvalidCastException(
-                    "A cadeia de caracteres informada não corresponde a um cnpj válido.");
+                    "A cadeia de caracteres informada não corresponde a um CNPJ válido.");
 
             Number = Internal.GetNumberFrom(number);
             CheckNumber = Internal.GetCheckNumberFrom(number);
@@ -49,7 +49,7 @@ namespace Person.Model.ValueObjects
         {
             if (cnpj == null)
                 throw new ArgumentNullException(nameof(cnpj),
-                    "Não é possível criar um cnpj a partir de um valor nulo.");
+                    "Não é possível criar um CNPJ a partir de um valor nulo.");
 
             if (IsOutOfRange(cnpj))
                 throw new ArgumentOutOfRangeException(
