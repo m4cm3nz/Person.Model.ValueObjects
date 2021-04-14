@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace Person.Model.ValueObjects
 {
+    [Obsolete("Soon this will be moved to new library DateTime.Model.ValueObjects", false)]
     public struct MonthOfYear
     {
         public MonthOfYear(string monthYear)
