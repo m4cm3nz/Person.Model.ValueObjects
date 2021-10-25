@@ -5,7 +5,12 @@ VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Person.Model.ValueObjects", "Person.Model.ValueObjects\Person.Model.ValueObjects.csproj", "{F591264F-8CF6-471A-A4CB-E923F5DABCF5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Person.Model.ValueObjectsTests", "Person.Model.ValueObjectsTests\Person.Model.ValueObjectsTests.csproj", "{820F9A72-BF5C-41A9-AF01-17E989CA6F02}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Person.Model.ValueObjectsTests", "Person.Model.ValueObjectsTests\Person.Model.ValueObjectsTests.csproj", "{820F9A72-BF5C-41A9-AF01-17E989CA6F02}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C51397A6-E8D4-48E7-A57E-C8B047631BB2}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
