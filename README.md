@@ -1,5 +1,5 @@
 # Person.Model.ValueObjects
-A .NET 5.0 collection with value objects that intend to model some Brazilian's Person domain properties
+A .NET 8.0 collection with value objects that intend to model some Brazilian's Person domain properties
 
 ### Build your domain model using some value objects can save a lot of time and be can very useful:
 ```c#
