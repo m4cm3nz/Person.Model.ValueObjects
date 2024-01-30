@@ -10,7 +10,7 @@ namespace Person.Model.ValueObjects
         private static readonly int NumberLength = 9;
         private static readonly int CPFLength = CheckNumberLength + NumberLength;
 
-        private string Raw => Number + CheckNumber;
+        private readonly string Raw => Number + CheckNumber;
         public string Number { get; set; }
         public string CheckNumber { get; set; }
 
@@ -37,7 +37,7 @@ namespace Person.Model.ValueObjects
             CheckNumber = Internal.GetCheckNumberFrom(number);
         }
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return Convert.ToUInt64(Raw).ToString(@"000\.000\.000\-00");
         }
@@ -50,7 +50,7 @@ namespace Person.Model.ValueObjects
 
             if (IsOutOfRange(number))
                 throw new ArgumentOutOfRangeException(
-                    $"Era esperado uma string numérica de {CPFLength} dígitos", nameof(number));
+                    nameof(number), $"Era esperado uma string numérica de {CPFLength} dígitos");
         }
 
         public static bool IsOutOfRange(string number) =>
@@ -75,9 +75,7 @@ namespace Person.Model.ValueObjects
         }
         public static bool IsValid(string number)
         {
-            return IsOutOfRange(number) ?
-                false :
-                Internal.IsValid(number);
+            return !IsOutOfRange(number) && Internal.IsValid(number);
         }
 
         private class Internal
@@ -89,7 +87,7 @@ namespace Person.Model.ValueObjects
 
             public static string GetNumberFrom(string number)
             {
-                return number?.Substring(0, NumberLength);
+                return number?[..NumberLength];
             }
 
             public static bool IsValid(string number)
@@ -101,9 +99,7 @@ namespace Person.Model.ValueObjects
 
                 var firstDigit = GetCheckDigitFrom(numberArray);
 
-                numberArray = numberArray
-                    .Append(firstDigit)
-                    .ToArray();
+                numberArray = [.. numberArray, firstDigit];
 
                 var secondDigit = GetCheckDigitFrom(numberArray);
 

@@ -13,7 +13,7 @@ namespace Person.Model.ValueObjects
         private static readonly int NumberLength = 12;
         private static readonly int CnpjLength = CheckNumberLength + NumberLength;
 
-        private string Raw => Number + CheckNumber;
+        private readonly string Raw => Number + CheckNumber;
         public string Number { get; private set; }
         public string CheckNumber { get; private set; }
 
@@ -40,7 +40,7 @@ namespace Person.Model.ValueObjects
             CheckNumber = Internal.GetCheckNumberFrom(number);
         }
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return Convert.ToUInt64(Raw).ToString(@"00\.000\.000\/0000\-00");
         }
@@ -53,7 +53,7 @@ namespace Person.Model.ValueObjects
 
             if (IsOutOfRange(cnpj))
                 throw new ArgumentOutOfRangeException(
-                    $"Era esperado uma string numérica de {CnpjLength} dígitos", nameof(cnpj));
+                    nameof(cnpj), $"Era esperado uma string numérica de {CnpjLength} dígitos");
         }
 
         public static bool IsOutOfRange(string number) =>
@@ -79,9 +79,7 @@ namespace Person.Model.ValueObjects
 
         public static bool IsValid(string number)
         {
-            return IsOutOfRange(number) ?
-                false :
-                Internal.IsValid(number);
+            return !IsOutOfRange(number) && Internal.IsValid(number);
         }
 
         private class Internal
@@ -93,7 +91,7 @@ namespace Person.Model.ValueObjects
 
             public static string GetNumberFrom(string number)
             {
-                return number?.Substring(0, NumberLength);
+                return number?[..NumberLength];
             }
 
             public static bool IsValid(string number)
@@ -105,9 +103,7 @@ namespace Person.Model.ValueObjects
 
                 var firstDigit = CheckDigit(numberArray);
 
-                numberArray = numberArray
-                    .Append(firstDigit)
-                    .ToArray();
+                numberArray = [.. numberArray, firstDigit];
 
                 var secondDigit = CheckDigit(numberArray);
 

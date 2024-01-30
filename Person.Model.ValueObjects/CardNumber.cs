@@ -2,7 +2,7 @@
 
 namespace Person.Model.ValueObjects
 {
-    public struct CardNumber
+    public readonly struct CardNumber
     {
         readonly string number;
 
@@ -22,7 +22,7 @@ namespace Person.Model.ValueObjects
             return new CardNumber(cardNumber);
         }
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return Convert.ToUInt64(number).ToString(@"0000 0000 0000 0000");
         }

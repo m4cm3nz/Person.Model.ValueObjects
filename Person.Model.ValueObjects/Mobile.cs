@@ -10,7 +10,7 @@ namespace Person.Model.ValueObjects
     /// ^(\+?55 ?)? ?(\([1-9]{2}\)|[1-9]{2}) ?(9\d{4}[-| ]?\d{4})$
     /// </summary>
     [Serializable]
-    public struct Mobile : PhoneNumber
+    public partial struct Mobile : IPhoneNumber
     {
         private static readonly string DefaultCountryCode = "55";
 
@@ -20,12 +20,15 @@ namespace Person.Model.ValueObjects
         private static readonly string Message =
             "O celular informado é inválido ou está em um formato incorreto.";
 
-        public static string GetOnlyNumbersFrom(string value) =>
-            string.Join(null, Regex.Matches(value, @"[0-9]+"));
+        [GeneratedRegex(@"[0-9]+")]
+        private static partial Regex OnlyNumbers();
 
-        public override string ToString()
+        public static string GetOnlyNumbersFrom(string value) =>
+            string.Join(null, OnlyNumbers().Matches(value));
+
+        public override readonly string ToString()
         {
-            return $"+{CountryCode} ({AreaCode} {Number.Substring(0, 5)} {Number.Substring(5, 4)})";
+            return $"+{CountryCode} ({AreaCode} {Number[..5]} {Number.Substring(5, 4)})";
         }
 
         public string Raw { get; private set; }

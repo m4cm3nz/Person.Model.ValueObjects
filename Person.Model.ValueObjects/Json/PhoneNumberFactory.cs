@@ -13,7 +13,7 @@ namespace Person.Model.ValueObjects.Json
             return new LandLine?(Create(ref reader));
         }
 
-        public static void Write(Utf8JsonWriter writer, PhoneNumber value)
+        public static void Write(Utf8JsonWriter writer, IPhoneNumber value)
         {
             writer.WriteStartObject();
             writer.WriteString(nameof(value.Raw), value.Raw);

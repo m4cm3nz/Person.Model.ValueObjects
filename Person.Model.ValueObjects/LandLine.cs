@@ -10,7 +10,7 @@ namespace Person.Model.ValueObjects
     /// ^(\+?55 ?)? ?(\([1-9]{2}\)|[1-9]{2}) ?([2-5]\d{3}[-| ]?\d{4})$
     /// </summary>
     [Serializable]
-    public struct LandLine : PhoneNumber
+    public partial struct LandLine : IPhoneNumber
     {
         private static readonly string DefaultCountryCode = "55";
 
@@ -20,17 +20,20 @@ namespace Person.Model.ValueObjects
         private static readonly string Message =
             "O telefone informado é inválido ou está em um formato incorreto.";
 
+        [GeneratedRegex(@"[0-9]+")]
+        private static partial Regex OnlyNumbersRegex();
+
         public static string GetOnlyNumbersFrom(string value) =>
-           string.Join(null, Regex.Matches(value, @"[0-9]+"));
+           string.Join(null, OnlyNumbersRegex().Matches(value));
 
         public string Raw { get; private set; }
         public string CountryCode { get; private set; }
         public string AreaCode { get; private set; }
         public string Number { get; private set; }
 
-        public override string ToString()
+        public override readonly string ToString()
         {
-            return $"+{CountryCode} ({AreaCode} {Number.Substring(0, 4)} {Number.Substring(4, 4)})";
+            return $"+{CountryCode} ({AreaCode} {Number[..4]} {Number.Substring(4, 4)})";
         }
 
         public LandLine(string phoneNumber)
@@ -59,5 +62,6 @@ namespace Person.Model.ValueObjects
 
             return new LandLine(phoneNumber);
         }
+
     }
 }

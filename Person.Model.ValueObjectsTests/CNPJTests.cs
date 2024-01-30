@@ -25,7 +25,7 @@ namespace Refere.Insurance.Person.Model.Tests
         [TestCase("39612247000102")]
         public void ImplicitCompareCNPJToStringTest(string value)
         {
-            CNPJ number = new CNPJ(value);
+            CNPJ number = new(value);
             Assert.That(number == value);
         }
 

@@ -44,7 +44,7 @@ namespace Refere.Insurance.Person.Model.Tests
             Assert.That(phoneNumber == phone);
             Assert.That(phoneNumber.CountryCode, Is.EqualTo("55"));
             Assert.That(phoneNumber.AreaCode, Is.EqualTo("51"));
-            Assert.That(phoneNumber.Number.Substring(0, 1), Is.EqualTo("9"));
+            Assert.That(phoneNumber.Number[..1], Is.EqualTo("9"));
             Assert.That(phoneNumber.Number.Substring(1, 8), Is.EqualTo("36351064"));
         }
     }

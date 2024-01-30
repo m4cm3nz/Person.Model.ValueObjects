@@ -1,6 +1,6 @@
 ﻿namespace Person.Model.ValueObjects
 {
-    public interface PhoneNumber
+    public interface IPhoneNumber
     {
         string Raw { get; }
         string CountryCode { get; }

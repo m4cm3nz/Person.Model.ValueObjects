@@ -24,7 +24,7 @@ namespace Refere.Insurance.Person.Model.Tests
         [TestCase("12738386024")]
         public void ImplicitCompareCpfToStringTest(string value)
         {
-            CPF cpf = new CPF(value);
+            CPF cpf = new(value);
             Assert.That(cpf == value);
         }
 
