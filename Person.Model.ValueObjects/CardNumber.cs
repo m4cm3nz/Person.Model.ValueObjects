@@ -4,21 +4,21 @@ using System.Text;
 namespace Person.Model.ValueObjects
 {
     /// <summary>
-    /// Representa um número de cartão de pagamento válido como value object imutável.
-    /// Valida o número via algoritmo de Luhn (mod 10). Aceita cartões de 13 a 19 dígitos.
+    /// Immutable value object representing a valid payment card number.
+    /// Validates the number via the Luhn algorithm (mod 10). Accepts cards with 13 to 19 digits.
     /// </summary>
     public readonly struct CardNumber : IEquatable<CardNumber>
     {
         private readonly string _number;
 
-        /// <summary>Número do cartão sem formatação.</summary>
+        /// <summary>The card number without formatting.</summary>
         public string Number => _number;
 
         /// <summary>
-        /// Constrói um CardNumber a partir de uma string de dígitos.
+        /// Constructs a CardNumber from a digit string.
         /// </summary>
-        /// <exception cref="ArgumentNullException">Quando <paramref name="number"/> é nulo.</exception>
-        /// <exception cref="ArgumentException">Quando o número falha na validação de Luhn ou tem comprimento inválido.</exception>
+        /// <exception cref="ArgumentNullException">When <paramref name="number"/> is null.</exception>
+        /// <exception cref="ArgumentException">When the number fails the Luhn check or has an invalid length.</exception>
         public CardNumber(string number)
         {
             if (number is null)
@@ -36,8 +36,8 @@ namespace Person.Model.ValueObjects
             new(cardNumber);
 
         /// <summary>
-        /// Retorna o número formatado em grupos de 4 dígitos separados por espaço.
-        /// Exemplo: <c>4929 6220 4125 4286</c>.
+        /// Returns the number formatted in groups of 4 digits separated by spaces.
+        /// Example: <c>4929 6220 4125 4286</c>.
         /// </summary>
         public override string ToString()
         {
@@ -51,11 +51,11 @@ namespace Person.Model.ValueObjects
         }
 
         /// <summary>
-        /// Valida uma string como número de cartão via algoritmo de Luhn.
-        /// Retorna <see langword="false"/> para strings com comprimento fora do intervalo 13–19
-        /// ou com caracteres não numéricos.
+        /// Validates a string as a card number via the Luhn algorithm.
+        /// Returns <see langword="false"/> for strings with length outside the 13–19 range
+        /// or containing non-numeric characters.
         /// </summary>
-        /// <exception cref="ArgumentNullException">Quando <paramref name="cardNumber"/> é nulo.</exception>
+        /// <exception cref="ArgumentNullException">When <paramref name="cardNumber"/> is null.</exception>
         public static bool IsValid(string cardNumber)
         {
             if (cardNumber is null) throw new ArgumentNullException(nameof(cardNumber));

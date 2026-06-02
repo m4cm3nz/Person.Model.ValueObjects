@@ -5,26 +5,26 @@
 ### Breaking changes
 
 #### CNPJ
-- Letras minúsculas agora lançam `ArgumentOutOfRangeException` em vez de serem normalizadas silenciosamente.
-- `ToString()` usa formatação de substring para todos os formatos, incluindo alfanumérico (`AB.123.456/0001-10`).
+- Lowercase letters now throw `ArgumentOutOfRangeException` instead of being silently normalized.
+- `ToString()` uses substring-based formatting for all formats, including alphanumeric (`AB.123.456/0001-10`).
 
 #### CPF
-- `IsNumeric(string)`, `IsElevenLength(string)` e `IsOutOfRange(string)` removidos da API pública.
-- `GetNumberFrom(string)` e `GetCheckNumberFrom(string)` removidos da API pública — use as propriedades `Number` e `CheckNumber` da instância.
+- `IsNumeric(string)`, `IsElevenLength(string)`, and `IsOutOfRange(string)` removed from the public API.
+- `GetNumberFrom(string)` and `GetCheckNumberFrom(string)` removed from the public API — use the `Number` and `CheckNumber` instance properties instead.
 
 #### LandLine / Mobile
-- `Raw` agora retorna sempre a forma canônica `CountryCode + AreaCode + Number`, independentemente do formato de entrada. Código que dependia de `Raw` retornar os dígitos exatos do input original precisa ser atualizado.
+- `Raw` now always returns the canonical form `CountryCode + AreaCode + Number`, regardless of the input format. Code that relied on `Raw` returning the exact digits of the original input needs to be updated.
 
 ---
 
 ### New features
 
-#### CNPJ — formato alfanumérico
-Suporte ao novo formato alfanumérico da Receita Federal (IN RFB nº 2.229/2024), vigente a partir de julho de 2026.
+#### CNPJ — alphanumeric format
+Support for the new alphanumeric CNPJ format from Receita Federal (IN RFB nº 2.229/2024), effective July 2026.
 
-- Formato: `[A-Z0-9]{12}[0-9]{2}` — os dois últimos caracteres (dígitos verificadores) continuam sempre numéricos.
-- O algoritmo de validação usa mapeamento ASCII-48 conforme especificação oficial.
-- `ToString()`, `IsValid()` e `StripMask()` funcionam para ambos os formatos.
+- Format: `[A-Z0-9]{12}[0-9]{2}` — the last two characters (check digits) remain always numeric.
+- The validation algorithm uses ASCII-48 mapping as per the official specification.
+- `ToString()`, `IsValid()`, and `StripMask()` work for both formats.
 
 ```csharp
 CNPJ cnpj = "AB123456000110";
@@ -36,35 +36,35 @@ CNPJ.IsValid("AB123456000110");      // true
 
 ### Improvements
 
-#### Plataforma
-- Migração de .NET 8 para .NET 10.
+#### Platform
+- Migrated from .NET 8 to .NET 10.
 
 #### CNPJ / CPF
-- `IEquatable<T>`, `operator ==`, `operator !=` e `GetHashCode` implementados explicitamente, eliminando o custo de reflection do `ValueType` em coleções.
-- Mensagens das exceções `InvalidOperationException` (atribuição nula via implicit operator) corrigidas para orientar o uso de `CNPJ?` / `CPF?`.
+- `IEquatable<T>`, `operator ==`, `operator !=`, and `GetHashCode` implemented explicitly, eliminating the reflection cost of `ValueType` in collections.
+- `InvalidOperationException` messages (null assignment via implicit operator) corrected to guide the use of `CNPJ?` / `CPF?`.
 
 #### LandLine / Mobile
-- Declarados como `readonly struct`, alinhando com `CNPJ`, `CPF` e `CardNumber`.
-- Igualdade corrigida: dois números logicamente equivalentes criados de inputs com formatos diferentes (ex.: `"5136352520"` e `"+55 (51) 3635-2520"`) agora são iguais.
-- Regex corrigido: separador `[-| ]` substituído por `[- ]` (o pipe não é separador válido em números de telefone).
+- Declared as `readonly struct`, aligned with `CNPJ`, `CPF`, and `CardNumber`.
+- Equality fixed: two logically equivalent numbers created from inputs in different formats (e.g., `"5136352520"` and `"+55 (51) 3635-2520"`) are now equal.
+- Regex fixed: separator `[-| ]` replaced by `[- ]` (the pipe character is not a valid separator in phone numbers).
 
 #### CardNumber
-- `IsValid` agora valida comprimento (13–19 dígitos) e rejeita caracteres não numéricos retornando `false`, em vez de lançar `FormatException`.
-- `ToString()` formata em grupos de 4 dígitos baseado no comprimento real do número, sem padding de zeros (comportamento anterior produzia resultados incorretos para cartões Diners/AmEx).
-- Propriedade pública `Number` exposta.
-- `IEquatable<CardNumber>`, `operator ==` e `operator !=` implementados.
-- Parâmetro do `implicit operator string` renomeado de `goodThruDate` para `cardNumber`.
+- `IsValid` now validates length (13–19 digits) and rejects non-numeric characters by returning `false`, instead of throwing `FormatException`.
+- `ToString()` formats into groups of 4 digits based on the actual number length, without zero-padding (previous behavior produced incorrect results for Diners/AmEx cards).
+- Public property `Number` exposed.
+- `IEquatable<CardNumber>`, `operator ==`, and `operator !=` implemented.
+- `implicit operator string` parameter renamed from `goodThruDate` to `cardNumber`.
 
 ---
 
 ### Bug fixes
 
-- **CardNumber.IsValid**: `NullReferenceException` ao receber `null` substituído por `ArgumentNullException`.
-- **LandLine / Mobile**: igualdade inconsistente entre instâncias do mesmo número em formatos de entrada diferentes (ver breaking change de `Raw` acima).
+- **CardNumber.IsValid**: `NullReferenceException` when receiving `null` replaced by `ArgumentNullException`.
+- **LandLine / Mobile**: inconsistent equality between instances of the same number in different input formats (see `Raw` breaking change above).
 
 ---
 
 ### Documentation
 
-- XML docs adicionados em `CPF`, `LandLine`, `Mobile` e `CardNumber`.
-- README atualizado: seções de `CardNumber` e `JSON converters` adicionadas; exemplos e referências a métodos removidos corrigidos; padrões de regex atualizados.
+- XML docs added to `CPF`, `LandLine`, `Mobile`, and `CardNumber`; translated to English across all value objects.
+- README updated: `CardNumber` and `JSON converters` sections added; corrected examples and references to removed methods; updated regex patterns.

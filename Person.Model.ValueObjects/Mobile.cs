@@ -4,12 +4,12 @@ using System.Text.RegularExpressions;
 namespace Person.Model.ValueObjects
 {
     /// <summary>
-    /// Representa um número de celular brasileiro válido como value object imutável.
-    /// Aceita DDI +55 (opcional), DDD de dois dígitos e número no padrão ANATEL para
-    /// celulares (primeiro dígito obrigatoriamente 9, total de 9 dígitos).
+    /// Immutable value object representing a valid Brazilian mobile phone number.
+    /// Accepts DDI +55 (optional), a two-digit area code (DDD), and a local number
+    /// following the ANATEL standard for mobile phones (first digit must be 9, 9 digits total).
     /// <para>
-    /// <see cref="Raw"/> sempre retorna a forma canônica <c>CountryCode + AreaCode + Number</c>,
-    /// independentemente do formato de entrada.
+    /// <see cref="Raw"/> always returns the canonical form <c>CountryCode + AreaCode + Number</c>,
+    /// regardless of the input format.
     /// </para>
     /// </summary>
     public readonly struct Mobile : IPhoneNumber, IEquatable<Mobile>
@@ -26,23 +26,23 @@ namespace Person.Model.ValueObjects
         private static string ExtractDigits(string value) =>
             string.Join(null, OnlyNumbers.Matches(value));
 
-        /// <summary>Forma canônica: <c>CountryCode + AreaCode + Number</c> (somente dígitos).</summary>
+        /// <summary>Canonical form: <c>CountryCode + AreaCode + Number</c> (digits only).</summary>
         public string Raw { get; }
 
-        /// <summary>DDI. Padrão <c>"55"</c> quando não informado na entrada.</summary>
+        /// <summary>Country calling code (DDI). Defaults to <c>"55"</c> when not supplied in the input.</summary>
         public string CountryCode { get; }
 
-        /// <summary>DDD com dois dígitos.</summary>
+        /// <summary>Two-digit area code (DDD).</summary>
         public string AreaCode { get; }
 
-        /// <summary>Número local com nove dígitos (início obrigatório com 9).</summary>
+        /// <summary>Nine-digit local number (must start with 9).</summary>
         public string Number { get; }
 
         /// <summary>
-        /// Constrói um Mobile a partir de uma string em qualquer formato aceito.
+        /// Constructs a Mobile from a string in any accepted format.
         /// </summary>
-        /// <exception cref="ArgumentNullException">Quando <paramref name="phoneNumber"/> é nulo ou vazio.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">Quando o formato não corresponde ao padrão ANATEL.</exception>
+        /// <exception cref="ArgumentNullException">When <paramref name="phoneNumber"/> is null or empty.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">When the format does not match the ANATEL pattern.</exception>
         public Mobile(string phoneNumber)
         {
             if (string.IsNullOrEmpty(phoneNumber))
@@ -61,15 +61,15 @@ namespace Person.Model.ValueObjects
             Raw = CountryCode + AreaCode + Number;
         }
 
-        /// <summary>Retorna o celular formatado: <c>+55 (51) 93635-1064</c>.</summary>
+        /// <summary>Returns the phone number formatted as: <c>+55 (51) 93635-1064</c>.</summary>
         public override string ToString() =>
             $"+{CountryCode} ({AreaCode}) {Number[..5]}-{Number[5..]}";
 
         public static implicit operator string(Mobile phone) => phone.Raw;
 
         /// <exception cref="InvalidOperationException">
-        /// Lançada quando <see langword="null"/> é atribuído via conversão implícita.
-        /// Use <see cref="Nullable{Mobile}"/> para representar ausência de valor.
+        /// Thrown when <see langword="null"/> is assigned via implicit conversion.
+        /// Use <see cref="Nullable{Mobile}"/> to represent the absence of a value.
         /// </exception>
         public static implicit operator Mobile(string phone)
         {

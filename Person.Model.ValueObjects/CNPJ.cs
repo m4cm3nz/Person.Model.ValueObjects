@@ -5,19 +5,20 @@ using System.Text.RegularExpressions;
 namespace Person.Model.ValueObjects
 {
     /// <summary>
-    /// Representa um CNPJ válido como value object imutável.
-    /// Suporta o formato numérico legado (14 dígitos) e o novo formato
-    /// alfanumérico vigente a partir de julho/2026 (IN RFB nº 2.229/2024).
+    /// Immutable value object representing a valid CNPJ
+    /// (<i>Cadastro Nacional de Pessoa Jurídica</i> — Brazilian Employer Identification Number).
+    /// Supports both the legacy numeric format and the new alphanumeric format
+    /// introduced by IN RFB nº 2.229/2024, effective July 2026.
     /// <para>
-    /// Formato: <c>[A-Z0-9]{12}[0-9]{2}</c> — os dois últimos caracteres
-    /// (dígitos verificadores) são sempre numéricos. Letras minúsculas são
-    /// rejeitadas; o caller é responsável pelo casing antes de construir o valor.
+    /// Format: <c>[A-Z0-9]{12}[0-9]{2}</c> — the last two characters (check digits)
+    /// are always numeric. Lowercase letters are rejected; the caller is responsible
+    /// for casing before constructing the value.
     /// </para>
     /// <para>
-    /// <b>Breaking changes v2:</b>
+    /// <b>v2 breaking changes:</b>
     /// <list type="bullet">
-    ///   <item><description><c>ToString()</c> retorna máscara alfanumérica (<c>AB.123.456/0001-00</c>) para todos os formatos.</description></item>
-    ///   <item><description>Letras minúsculas lançam <c>ArgumentOutOfRangeException</c> em vez de serem normalizadas silenciosamente.</description></item>
+    ///   <item><description><c>ToString()</c> uses alphanumeric mask for all formats (<c>AB.123.456/0001-00</c>).</description></item>
+    ///   <item><description>Lowercase letters throw <c>ArgumentOutOfRangeException</c> instead of being silently uppercased.</description></item>
     /// </list>
     /// </para>
     /// <see href="https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/perguntas-e-respostas/cnpj/cnpj-alfanumerico.pdf"/>
@@ -33,14 +34,18 @@ namespace Person.Model.ValueObjects
 
         private readonly string _raw;
 
-        /// <summary>Os 12 primeiros caracteres: raiz + ordem do estabelecimento.</summary>
+        /// <summary>The first 12 characters: company root and establishment order.</summary>
         public string Number { get; }
 
-        /// <summary>Os 2 dígitos verificadores.</summary>
+        /// <summary>The 2 check digits.</summary>
         public string CheckNumber { get; }
 
         public static implicit operator string(CNPJ cnpj) => cnpj._raw;
 
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when <see langword="null"/> is assigned via implicit conversion.
+        /// Use <see cref="Nullable{CNPJ}"/> to represent the absence of a value.
+        /// </exception>
         public static implicit operator CNPJ(string value) => value is null
             ? throw new InvalidOperationException("Para valores nulos utilize CNPJ?.")
             : new(value);
@@ -52,13 +57,13 @@ namespace Person.Model.ValueObjects
         }
 
         /// <summary>
-        /// Constrói um CNPJ a partir de uma string com ou sem máscara de formatação.
-        /// Pontos, barra e hífen são removidos automaticamente; letras devem estar
-        /// em maiúsculas — minúsculas resultam em <see cref="ArgumentOutOfRangeException"/>.
+        /// Constructs a CNPJ from a string with or without formatting mask.
+        /// Dots, slash and hyphen are stripped automatically; letters must be
+        /// uppercase — lowercase results in <see cref="ArgumentOutOfRangeException"/>.
         /// </summary>
-        /// <exception cref="ArgumentNullException">Quando <paramref name="value"/> é nulo.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">Quando o formato é inválido.</exception>
-        /// <exception cref="InvalidCastException">Quando os dígitos verificadores não conferem.</exception>
+        /// <exception cref="ArgumentNullException">When <paramref name="value"/> is null.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">When the format is invalid.</exception>
+        /// <exception cref="InvalidCastException">When the check digits do not match.</exception>
         public CNPJ(string value)
         {
             if (value is null)
@@ -81,15 +86,15 @@ namespace Person.Model.ValueObjects
         }
 
         /// <summary>
-        /// Retorna o CNPJ formatado com máscara: <c>XX.XXX.XXX/XXXX-XX</c>.
-        /// Funciona para formatos numérico e alfanumérico.
+        /// Returns the CNPJ formatted with mask: <c>XX.XXX.XXX/XXXX-XX</c>.
+        /// Works for both numeric and alphanumeric formats.
         /// </summary>
         public override string ToString() =>
             $"{_raw[..2]}.{_raw[2..5]}.{_raw[5..8]}/{_raw[8..12]}-{_raw[12..]}";
 
         /// <summary>
-        /// Valida uma string como CNPJ sem lançar exceção.
-        /// Remove máscara automaticamente; rejeita letras minúsculas.
+        /// Validates a string as a CNPJ without throwing.
+        /// Strips the mask automatically; rejects lowercase letters.
         /// </summary>
         public static bool IsValid(string value)
         {
@@ -99,9 +104,9 @@ namespace Person.Model.ValueObjects
         }
 
         /// <summary>
-        /// Remove os caracteres de máscara (<c>.</c>, <c>/</c>, <c>-</c>) da string.
-        /// Não altera casing — letras minúsculas permanecem e serão rejeitadas
-        /// na validação de formato.
+        /// Removes mask characters (<c>.</c>, <c>/</c>, <c>-</c>) from the string.
+        /// Does not alter casing — lowercase letters remain and will be rejected
+        /// during format validation.
         /// </summary>
         public static string StripMask(string value) =>
             value.Replace(".", "").Replace("/", "").Replace("-", "").Trim();
