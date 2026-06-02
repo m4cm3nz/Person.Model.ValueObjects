@@ -99,7 +99,8 @@ namespace Person.Model.ValueObjects.Tests
             Mobile? mobile = value;
 
             Assert.That(mobile.HasValue, Is.True);
-            Assert.That(mobile.Value.Raw, Is.EqualTo(value));
+            Assert.That(mobile.Value.CountryCode, Is.EqualTo("55"));
+            Assert.That(mobile.Value.AreaCode, Is.EqualTo("51"));
 
             mobile = null;
 

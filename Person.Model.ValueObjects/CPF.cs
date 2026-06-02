@@ -1,11 +1,9 @@
-﻿// CPF.cs
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Person.Model.ValueObjects
 {
-    [Serializable]
     public readonly struct CPF : IEquatable<CPF>
     {
         private const int CheckNumberLength = 2;
@@ -14,22 +12,22 @@ namespace Person.Model.ValueObjects
         private const int Modulus = 11;
 
         private static readonly Regex FormatMask =
-            new Regex(@"^\d{11}$", RegexOptions.Compiled);
+            new(@"^\d{11}$", RegexOptions.Compiled);
+
+        private readonly string _raw;
 
         public string Number { get; }
         public string CheckNumber { get; }
 
-        private string Raw => Number + CheckNumber;
+        public static implicit operator string(CPF cpf) => cpf._raw;
 
-        public static implicit operator string(CPF cpf) => cpf.Raw;
-
-        public static implicit operator CPF(string value) => value is null ?
-            throw new InvalidOperationException():
-            new (value);
+        public static implicit operator CPF(string value) => value is null
+            ? throw new InvalidOperationException("Para valores nulos utilize CPF?.")
+            : new(value);
 
         public static implicit operator CPF?(string value)
         {
-            if(value == null ) return null;
+            if (value == null) return null;
             return new CPF(value);
         }
 
@@ -51,10 +49,11 @@ namespace Person.Model.ValueObjects
 
             Number = value[..NumberLength];
             CheckNumber = value[NumberLength..];
+            _raw = value;
         }
 
         public override string ToString() =>
-            $"{Raw[..3]}.{Raw[3..6]}.{Raw[6..9]}-{Raw[9..]}";
+            $"{_raw[..3]}.{_raw[3..6]}.{_raw[6..9]}-{_raw[9..]}";
 
         public static bool IsValid(string value)
         {
@@ -66,30 +65,9 @@ namespace Person.Model.ValueObjects
         public static string StripMask(string value) =>
             value.Replace(".", "").Replace("-", "").Trim();
 
-        public static bool IsNumeric(string value) => value.All(char.IsNumber);
-        public static bool IsElevenLength(string value) => value.Length == CpfLength;
-        public static bool IsOutOfRange(string value) => !IsElevenLength(value) || !IsNumeric(value);
-
-        public static string GetNumberFrom(string value)
-        {
-            if (value is null) throw new ArgumentNullException(nameof(value));
-            value = StripMask(value);
-            if (IsOutOfRange(value)) throw new ArgumentOutOfRangeException(nameof(value));
-            return value[..NumberLength];
-        }
-
-        public static string GetCheckNumberFrom(string value)
-        {
-            if (value is null) throw new ArgumentNullException(nameof(value));
-            value = StripMask(value);
-            if (IsOutOfRange(value)) throw new ArgumentOutOfRangeException(nameof(value));
-            return value[NumberLength..];
-        }
-
-        public bool Equals(CPF other) => Raw == other.Raw;
+        public bool Equals(CPF other) => _raw == other._raw;
         public override bool Equals(object obj) => obj is CPF other && Equals(other);
-        public override int GetHashCode() => Raw.GetHashCode();
-
+        public override int GetHashCode() => _raw?.GetHashCode() ?? 0;
         public static bool operator ==(CPF left, CPF right) => left.Equals(right);
         public static bool operator !=(CPF left, CPF right) => !left.Equals(right);
 

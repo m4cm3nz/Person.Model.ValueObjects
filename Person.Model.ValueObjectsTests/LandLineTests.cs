@@ -112,9 +112,9 @@ namespace Person.Model.ValueObjects.Tests
         // ------------------------------------------------------------------ //
 
         [Test]
-        [TestCase("5136352520", "5136352520")]
+        [TestCase("5136352520", "555136352520")]
         [TestCase("+55 (51) 3635-2520", "555136352520")]
-        public void RawContainsOnlyDigitsTest(string input, string expectedRaw)
+        public void RawIsCanonicalFormTest(string input, string expectedRaw)
         {
             var landLine = new LandLine(input);
 
@@ -132,7 +132,8 @@ namespace Person.Model.ValueObjects.Tests
             LandLine? phone = value;
 
             Assert.That(phone.HasValue, Is.True);
-            Assert.That(phone.Value.Raw, Is.EqualTo(value));
+            Assert.That(phone.Value.CountryCode, Is.EqualTo("55"));
+            Assert.That(phone.Value.AreaCode, Is.EqualTo("51"));
 
             phone = null;
 

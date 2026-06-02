@@ -1,14 +1,13 @@
-﻿using System;
+using System;
 using System.Text.RegularExpressions;
 
 namespace Person.Model.ValueObjects
 {
-    [Serializable]
-    public struct LandLine : IPhoneNumber, IEquatable<LandLine>
+    public readonly struct LandLine : IPhoneNumber, IEquatable<LandLine>
     {
         private const string DefaultCountryCode = "55";
         private const string Pattern =
-            @"^(\+?55 ?)? ?(\([1-9]{2}\)|[1-9]{2}) ?([2-5]\d{3}[-| ]?\d{4})$";
+            @"^(\+?55 ?)? ?(\([1-9]{2}\)|[1-9]{2}) ?([2-5]\d{3}[- ]?\d{4})$";
         private const string InvalidMessage =
             "O telefone informado é inválido ou está em um formato incorreto.";
 
@@ -38,10 +37,10 @@ namespace Person.Model.ValueObjects
             CountryCode = string.IsNullOrEmpty(country) ? DefaultCountryCode : country;
             AreaCode = ExtractDigits(match.Groups[2].Value);
             Number = ExtractDigits(match.Groups[3].Value);
-            Raw = ExtractDigits(phoneNumber);
+            Raw = CountryCode + AreaCode + Number;
         }
 
-        public override readonly string ToString() =>
+        public override string ToString() =>
             $"+{CountryCode} ({AreaCode}) {Number[..4]}-{Number[4..]}";
 
         public static implicit operator string(LandLine phone) => phone.Raw;
@@ -56,8 +55,7 @@ namespace Person.Model.ValueObjects
 
         public bool Equals(LandLine other) => Raw == other.Raw;
         public override bool Equals(object obj) => obj is LandLine other && Equals(other);
-        public override readonly int GetHashCode() => Raw.GetHashCode();
-
+        public override int GetHashCode() => Raw?.GetHashCode() ?? 0;
         public static bool operator ==(LandLine left, LandLine right) => left.Equals(right);
         public static bool operator !=(LandLine left, LandLine right) => !left.Equals(right);
     }

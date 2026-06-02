@@ -1,52 +1,66 @@
-﻿using System;
+using System;
+using System.Text;
 
 namespace Person.Model.ValueObjects
 {
-    public readonly struct CardNumber
+    public readonly struct CardNumber : IEquatable<CardNumber>
     {
-        readonly string number;
+        private readonly string _number;
+
+        public string Number => _number;
 
         public CardNumber(string number)
         {
+            if (number is null)
+                throw new ArgumentNullException(nameof(number));
+
             if (!IsValid(number))
-                throw new ArgumentException("Número do cartão inválido.");
+                throw new ArgumentException("Número do cartão inválido.", nameof(number));
 
-            this.number = number;
+            _number = number;
         }
 
-        public static implicit operator string(CardNumber goodThruDate) =>
-           goodThruDate.number;
+        public static implicit operator string(CardNumber cardNumber) => cardNumber._number;
 
-        public static implicit operator CardNumber(string cardNumber)
-        {
-            return new CardNumber(cardNumber);
-        }
+        public static implicit operator CardNumber(string cardNumber) =>
+            new(cardNumber);
 
-        public override readonly string ToString()
+        public override string ToString()
         {
-            return Convert.ToUInt64(number).ToString(@"0000 0000 0000 0000");
+            var sb = new StringBuilder(_number.Length + _number.Length / 4);
+            for (int i = 0; i < _number.Length; i++)
+            {
+                if (i > 0 && i % 4 == 0) sb.Append(' ');
+                sb.Append(_number[i]);
+            }
+            return sb.ToString();
         }
 
         public static bool IsValid(string cardNumber)
         {
             if (cardNumber is null) throw new ArgumentNullException(nameof(cardNumber));
+            if (cardNumber.Length < 13 || cardNumber.Length > 19) return false;
 
-            var sum = 0;
-            var shouldDouble = false;
+            int sum = 0;
+            bool shouldDouble = false;
 
-            var cardNumberArray = cardNumber.ToCharArray();
-
-            for (var i = cardNumberArray.Length - 1; i >= 0; i--)
+            for (int i = cardNumber.Length - 1; i >= 0; i--)
             {
-                var digit = int.Parse(cardNumberArray[i].ToString());
-
+                char c = cardNumber[i];
+                if (c < '0' || c > '9') return false;
+                int digit = c - '0';
                 if (shouldDouble && (digit *= 2) > 9) digit -= 9;
-
                 sum += digit;
                 shouldDouble = !shouldDouble;
             }
 
-            return (sum % 10) == 0;
+            return sum % 10 == 0;
         }
+
+        public bool Equals(CardNumber other) => _number == other._number;
+        public override bool Equals(object obj) => obj is CardNumber other && Equals(other);
+        public override int GetHashCode() => _number?.GetHashCode() ?? 0;
+        public static bool operator ==(CardNumber left, CardNumber right) => left.Equals(right);
+        public static bool operator !=(CardNumber left, CardNumber right) => !left.Equals(right);
     }
 }

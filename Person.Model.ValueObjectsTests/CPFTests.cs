@@ -110,26 +110,6 @@ namespace Person.Model.ValueObjects.Tests
         }
 
         // ------------------------------------------------------------------ //
-        // Static helpers                                                      //
-        // ------------------------------------------------------------------ //
-
-        [Test]
-        [TestCase("38124036098", "381240360")]
-        [TestCase("104.119.810-80", "104119810")]
-        public void GetNumberFromReturnsCorrectSegmentTest(string input, string expected)
-        {
-            Assert.That(CPF.GetNumberFrom(input), Is.EqualTo(expected));
-        }
-
-        [Test]
-        [TestCase("38124036098", "98")]
-        [TestCase("104.119.810-80", "80")]
-        public void GetCheckNumberFromReturnsCorrectSegmentTest(string input, string expected)
-        {
-            Assert.That(CPF.GetCheckNumberFrom(input), Is.EqualTo(expected));
-        }
-
-        // ------------------------------------------------------------------ //
         // Nullable                                                            //
         // ------------------------------------------------------------------ //
 

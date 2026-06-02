@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -22,8 +22,7 @@ namespace Person.Model.ValueObjects
     /// </para>
     /// <see href="https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/perguntas-e-respostas/cnpj/cnpj-alfanumerico.pdf"/>
     /// </summary>
-    [Serializable]
-    public readonly struct CNPJ
+    public readonly struct CNPJ : IEquatable<CNPJ>
     {
         private const int CheckNumberLength = 2;
         private const int NumberLength = 12;
@@ -32,19 +31,18 @@ namespace Person.Model.ValueObjects
         private static readonly Regex FormatMask =
             new(@"^[A-Z0-9]{12}\d{2}$", RegexOptions.Compiled);
 
+        private readonly string _raw;
+
         /// <summary>Os 12 primeiros caracteres: raiz + ordem do estabelecimento.</summary>
         public string Number { get; }
 
         /// <summary>Os 2 dígitos verificadores.</summary>
         public string CheckNumber { get; }
 
-        /// <summary>CNPJ sem máscara: <c>39612247000102</c>.</summary>
-        private string Raw => Number + CheckNumber;
-
-        public static implicit operator string(CNPJ cnpj) => cnpj.Raw;
+        public static implicit operator string(CNPJ cnpj) => cnpj._raw;
 
         public static implicit operator CNPJ(string value) => value is null
-            ? throw new InvalidOperationException(nameof(value))
+            ? throw new InvalidOperationException("Para valores nulos utilize CNPJ?.")
             : new(value);
 
         public static implicit operator CNPJ?(string value)
@@ -79,6 +77,7 @@ namespace Person.Model.ValueObjects
 
             Number = value[..NumberLength];
             CheckNumber = value[NumberLength..];
+            _raw = value;
         }
 
         /// <summary>
@@ -86,7 +85,7 @@ namespace Person.Model.ValueObjects
         /// Funciona para formatos numérico e alfanumérico.
         /// </summary>
         public override string ToString() =>
-            $"{Raw[..2]}.{Raw[2..5]}.{Raw[5..8]}/{Raw[8..12]}-{Raw[12..]}";
+            $"{_raw[..2]}.{_raw[2..5]}.{_raw[5..8]}/{_raw[8..12]}-{_raw[12..]}";
 
         /// <summary>
         /// Valida uma string como CNPJ sem lançar exceção.
@@ -97,7 +96,7 @@ namespace Person.Model.ValueObjects
             if (value is null) return false;
             value = StripMask(value);
             return FormatMask.IsMatch(value) && Internal.IsValid(value);
-        }        
+        }
 
         /// <summary>
         /// Remove os caracteres de máscara (<c>.</c>, <c>/</c>, <c>-</c>) da string.
@@ -106,6 +105,12 @@ namespace Person.Model.ValueObjects
         /// </summary>
         public static string StripMask(string value) =>
             value.Replace(".", "").Replace("/", "").Replace("-", "").Trim();
+
+        public bool Equals(CNPJ other) => _raw == other._raw;
+        public override bool Equals(object obj) => obj is CNPJ other && Equals(other);
+        public override int GetHashCode() => _raw?.GetHashCode() ?? 0;
+        public static bool operator ==(CNPJ left, CNPJ right) => left.Equals(right);
+        public static bool operator !=(CNPJ left, CNPJ right) => !left.Equals(right);
 
         private static class Internal
         {
