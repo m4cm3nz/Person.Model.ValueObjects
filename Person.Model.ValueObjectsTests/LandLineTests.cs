@@ -1,12 +1,16 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using Person.Model.ValueObjects;
 using System;
 
-namespace Refere.Insurance.Person.Model.Tests
+namespace Person.Model.ValueObjects.Tests
 {
     [TestFixture]
-    public class LandLineTests
+    internal class LandLineTests
     {
+        // ------------------------------------------------------------------ //
+        // Valid formats                                                        //
+        // ------------------------------------------------------------------ //
+
         [Test]
         [TestCase("5126352520")]
         [TestCase("5136352520")]
@@ -39,44 +43,100 @@ namespace Refere.Insurance.Person.Model.Tests
         [TestCase("+55 (51) 36352520")]
         [TestCase("+55 (51) 3635 2520")]
         [TestCase("+55 (51) 3635-2520")]
-        public void CreateLandLineTest(string phone)
+        public void ValidFormatsAreAcceptedTest(string phone)
         {
-            var phoneNumber = new LandLine(phone);
-            Assert.That(phoneNumber == phone);
-            Assert.That(phoneNumber.CountryCode, Is.EqualTo("55"));
-            Assert.That(phoneNumber.AreaCode, Is.EqualTo("51"));
-            Assert.That("2,3,4,5".Contains(phoneNumber.Number[..1]));
-            Assert.That(phoneNumber.Number.Substring(1, 7), Is.EqualTo("6352520"));
+            var landLine = new LandLine(phone);
+
+            Assert.That(landLine.CountryCode, Is.EqualTo("55"));
+            Assert.That(landLine.AreaCode, Is.EqualTo("51"));
+            Assert.That(landLine.Number[0], Is.InRange('2', '5'));
+            Assert.That(landLine.Number[1..], Is.EqualTo("6352520"));
         }
-        
-        [Test]        
+
+        // ------------------------------------------------------------------ //
+        // Anatel out-of-range                                                 //
+        // ------------------------------------------------------------------ //
+
+        [Test]
         [TestCase("+55 (99) 0999-9999")]
         [TestCase("+55 (99) 1999-9999")]
         [TestCase("+55 (99) 6999-9999")]
         [TestCase("+55 (99) 7999-9999")]
         [TestCase("+55 (99) 8999-9999")]
-        [TestCase("+55 (99) 9999-9999")]        
-        [TestCase("+55 (00) 2059-9999")]        
-        [TestCase("+55 (90) 2950-9999")]        
-        [TestCase("+55 (09) 2950-9999")]        
-        public void ShoudNotBeAbleToCreateAnatelOutOfRangeLandLineTest(string phone)
+        [TestCase("+55 (99) 9999-9999")]
+        [TestCase("+55 (00) 2059-9999")]
+        [TestCase("+55 (90) 2950-9999")]
+        [TestCase("+55 (09) 2950-9999")]
+        public void AnatelOutOfRangeNumberShouldThrowArgumentOutOfRangeTest(string phone)
         {
-            //Range validator @"^(\+?55 ?)? ?(\([1-9]{2}\)|[1-9]{2}) ?([2-5]\d{3}[-| ]?\d{4})$"
             Assert.Throws<ArgumentOutOfRangeException>(() => new LandLine(phone));
         }
 
-        [Test]
-        [TestCase("5136352520")]
-        public void ShouldBeAbleToDefineNullableLandLineTest(string value)
-        {
-            LandLine? phone = value;
-            Assert.That(phone == value);
-            Assert.That(phone.HasValue);
+        // ------------------------------------------------------------------ //
+        // ToString                                                            //
+        // ------------------------------------------------------------------ //
 
-            phone = null;
-            Assert.That(phone == null);
-            Assert.That(phone.HasValue, Is.False);
+        [Test]
+        [TestCase("5136352520", "+55 (51) 3635-2520")]
+        public void ToStringFormatsCorrectlyTest(string raw, string expected)
+        {
+            var landLine = new LandLine(raw);
+
+            Assert.That(landLine.ToString(), Is.EqualTo(expected));
         }
 
+        // ------------------------------------------------------------------ //
+        // ArgumentNullException                                               //
+        // ------------------------------------------------------------------ //
+
+        [Test]
+        [TestCase(null)]
+        [TestCase("")]
+        public void NullOrEmptyShouldThrowArgumentNullTest(string phone)
+        {
+            Assert.Throws<ArgumentNullException>(() => new LandLine(phone));
+        }
+
+        // ------------------------------------------------------------------ //
+        // InvalidOperationException (implicit null)                          //
+        // ------------------------------------------------------------------ //
+
+        [Test]
+        public void NullImplicitAssignmentShouldThrowInvalidOperationTest()
+        {
+            Assert.Throws<InvalidOperationException>(() => { LandLine _ = (string)null; });
+        }
+
+        // ------------------------------------------------------------------ //
+        // Raw                                                                 //
+        // ------------------------------------------------------------------ //
+
+        [Test]
+        [TestCase("5136352520", "5136352520")]
+        [TestCase("+55 (51) 3635-2520", "555136352520")]
+        public void RawContainsOnlyDigitsTest(string input, string expectedRaw)
+        {
+            var landLine = new LandLine(input);
+
+            Assert.That(landLine.Raw, Is.EqualTo(expectedRaw));
+        }
+
+        // ------------------------------------------------------------------ //
+        // Nullable                                                            //
+        // ------------------------------------------------------------------ //
+
+        [Test]
+        [TestCase("5136352520")]
+        public void NullableLandLineBehaviorTest(string value)
+        {
+            LandLine? phone = value;
+
+            Assert.That(phone.HasValue, Is.True);
+            Assert.That(phone.Value.Raw, Is.EqualTo(value));
+
+            phone = null;
+
+            Assert.That(phone.HasValue, Is.False);
+        }
     }
 }

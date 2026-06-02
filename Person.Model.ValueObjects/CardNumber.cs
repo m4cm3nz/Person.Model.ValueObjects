@@ -29,6 +29,8 @@ namespace Person.Model.ValueObjects
 
         public static bool IsValid(string cardNumber)
         {
+            if (cardNumber is null) throw new ArgumentNullException(nameof(cardNumber));
+
             var sum = 0;
             var shouldDouble = false;
 

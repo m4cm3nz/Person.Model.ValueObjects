@@ -2,7 +2,7 @@
 using Person.Model.ValueObjects;
 using System;
 
-namespace Refere.Insurance.Person.Model.Tests
+namespace Person.Model.ValueObjects.Tests
 {
     [TestFixture]
     internal class CNPJTests
@@ -37,7 +37,7 @@ namespace Refere.Insurance.Person.Model.Tests
         public void ImplicitConversionFromStringTest(string value)
         {
             CNPJ cnpj = value;
-            Assert.That(cnpj == value);
+            Assert.That((string)cnpj, Is.EqualTo(value));
         }
 
         [Test]
@@ -118,11 +118,10 @@ namespace Refere.Insurance.Person.Model.Tests
         public void CNPJCanBeSetToNullableBehaviorTest(string value)
         {
             CNPJ? cnpj = value;
-            Assert.That(cnpj.Value == value);
+            Assert.That((string)cnpj.Value, Is.EqualTo(value));
             Assert.That(cnpj.HasValue, Is.True);
 
             cnpj = null;
-            Assert.That(cnpj == null);
             Assert.That(cnpj.HasValue, Is.False);
         }
 

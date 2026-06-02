@@ -4,9 +4,9 @@ using Person.Model.ValueObjects.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Person.Model.ValueObjectsTests
+namespace Person.Model.ValueObjects.Tests
 {
-    public class DummyObject
+    internal class DummyObject
     {
         public string Name { get; set; }
         [JsonConverter(typeof(MobileConverter))]
@@ -16,7 +16,7 @@ namespace Person.Model.ValueObjectsTests
     }
 
     [TestFixture]
-    public class JsonDeserializationTests
+    internal class JsonDeserializationTests
     {
         [Test]
         public void ShouldBeAbleToDeserializeMobileAndLandlineUsingTextJson()
