@@ -5,7 +5,7 @@ A .NET 10.0 collection of value objects for modelling Brazilian person domain pr
 ```csharp
 public class Company
 {
-    public CNPJ   CNPJ     { get; set; }
+    public CNPJ    CNPJ     { get; set; }
     public LandLine LandLine { get; set; }
 }
 
@@ -15,13 +15,13 @@ var company = new Company
     LandLine = "5136350020"
 };
 
-Console.WriteLine(company.CNPJ);            // 39.612.247/0001-02
-Console.WriteLine(company.CNPJ.Number);     // 396122470001
-Console.WriteLine(company.CNPJ.CheckNumber);// 02
+Console.WriteLine(company.CNPJ);             // 39.612.247/0001-02
+Console.WriteLine(company.CNPJ.Number);      // 396122470001
+Console.WriteLine(company.CNPJ.CheckNumber); // 02
 
-Console.WriteLine(company.LandLine);           // +55 (51) 3635-0020
-Console.WriteLine(company.LandLine.AreaCode);  // 51
-Console.WriteLine(company.LandLine.Number);    // 36350020
+Console.WriteLine(company.LandLine);          // +55 (51) 3635-0020
+Console.WriteLine(company.LandLine.AreaCode); // 51
+Console.WriteLine(company.LandLine.Number);   // 36350020
 ```
 
 ---
@@ -39,9 +39,7 @@ Formatting characters (`.` `/` `-`) are stripped automatically on construction.
 Lowercase letters are **rejected** — the caller is responsible for casing.
 
 > **v2 breaking changes**
-> - `IsNumeric`, `IsFourteenLength`, `IsOutOfRange` removed from the public API.
-> - Static `GetNumberFrom(string)` and `GetCheckNumberFrom(string)` removed — use instance properties.
-> - `ToString()` now uses substring formatting for all formats (numeric and alphanumeric).
+> - `ToString()` now uses alphanumeric mask for all formats (`AB.123.456/0001-10`).
 > - Lowercase letters throw `ArgumentOutOfRangeException` instead of being silently uppercased.
 
 ### Creation
@@ -61,12 +59,10 @@ CNPJ? cnpj = null;
 var cnpj = new CNPJ("AB123456000110");
 ```
 
-Throws:
-
 | Exception | Condition |
 |---|---|
 | `ArgumentNullException` | `null` passed to constructor |
-| `InvalidOperationException` | `null` assigned via implicit operator |
+| `InvalidOperationException` | `null` assigned via implicit operator — use `CNPJ?` |
 | `ArgumentOutOfRangeException` | wrong length, invalid characters, or lowercase letters |
 | `InvalidCastException` | check digits do not match |
 
@@ -75,10 +71,10 @@ Throws:
 ```csharp
 CNPJ cnpj = "39612247000102";
 
-Console.WriteLine((string)cnpj);    // 39612247000102  (raw, implicit)
-Console.WriteLine(cnpj.Number);     // 396122470001
-Console.WriteLine(cnpj.CheckNumber);// 02
-Console.WriteLine(cnpj.ToString()); // 39.612.247/0001-02
+Console.WriteLine((string)cnpj);     // 39612247000102
+Console.WriteLine(cnpj.Number);      // 396122470001
+Console.WriteLine(cnpj.CheckNumber); // 02
+Console.WriteLine(cnpj.ToString());  // 39.612.247/0001-02
 ```
 
 Alphanumeric:
@@ -86,25 +82,23 @@ Alphanumeric:
 ```csharp
 CNPJ cnpj = "AB123456000110";
 
-Console.WriteLine((string)cnpj);    // AB123456000110
-Console.WriteLine(cnpj.Number);     // AB1234560001
-Console.WriteLine(cnpj.CheckNumber);// 10
-Console.WriteLine(cnpj.ToString()); // AB.123.456/0001-10
+Console.WriteLine((string)cnpj);     // AB123456000110
+Console.WriteLine(cnpj.Number);      // AB1234560001
+Console.WriteLine(cnpj.CheckNumber); // 10
+Console.WriteLine(cnpj.ToString());  // AB.123.456/0001-10
 ```
 
 ### Static helpers
 
 ```csharp
-// validate without throwing
-CNPJ.IsValid("39612247000102");          // true
-CNPJ.IsValid("39.612.247/0001-02");      // true  (mask accepted)
-CNPJ.IsValid("AB123456000110");          // true  (alphanumeric)
-CNPJ.IsValid("39612237000102");          // false (wrong check digit)
-CNPJ.IsValid(null);                      // false
+CNPJ.IsValid("39612247000102");     // true
+CNPJ.IsValid("39.612.247/0001-02"); // true  (mask accepted)
+CNPJ.IsValid("AB123456000110");     // true  (alphanumeric)
+CNPJ.IsValid("39612237000102");     // false (wrong check digit)
+CNPJ.IsValid(null);                 // false
 
-// strip formatting characters only — does not change casing
-CNPJ.StripMask("39.612.247/0001-02");    // 39612247000102
-CNPJ.StripMask("AB.123.456/0001-10");    // AB123456000110
+CNPJ.StripMask("39.612.247/0001-02"); // 39612247000102
+CNPJ.StripMask("AB.123.456/0001-10"); // AB123456000110
 ```
 
 ---
@@ -117,9 +111,18 @@ CNPJ.StripMask("AB.123.456/0001-10");    // AB123456000110
 
 ```csharp
 var cpf = new CPF("99194415030");
-CPF cpf = "99194415030";
-CPF? cpf = null;
+var cpf = new CPF("991.944.150-30"); // mask accepted
+
+CPF cpf = "99194415030";  // implicit operator
+CPF? cpf = null;          // nullable
 ```
+
+| Exception | Condition |
+|---|---|
+| `ArgumentNullException` | `null` passed to constructor |
+| `InvalidOperationException` | `null` assigned via implicit operator — use `CPF?` |
+| `ArgumentOutOfRangeException` | non-numeric or wrong length |
+| `InvalidCastException` | check digits do not match |
 
 ### Properties
 
@@ -135,13 +138,12 @@ Console.WriteLine(cpf.ToString());  // 991.944.150-30
 ### Static helpers
 
 ```csharp
-CPF.IsNumeric("991 94 415 030");         // false
-CPF.IsElevenLength("991944150302342");   // false
-CPF.IsOutOfRange("99194415030");         // false
-CPF.IsOutOfRange("991 944 ABC 150");     // true
-CPF.IsValid("99194415030");              // true
-CPF.GetNumberFrom("99194415030");        // 991944150
-CPF.GetCheckNumberFrom("99194415030");   // 30
+CPF.IsValid("99194415030");       // true
+CPF.IsValid("991.944.150-30");    // true  (mask accepted)
+CPF.IsValid("23412412412");       // false (wrong check digit)
+CPF.IsValid(null);                // false
+
+CPF.StripMask("991.944.150-30"); // 99194415030
 ```
 
 ---
@@ -149,35 +151,45 @@ CPF.GetCheckNumberFrom("99194415030");   // 30
 ## LandLine
 
 Brazilian landline phone number in ANATEL standard format.
+First digit of the local number must be between 2 and 5.
 
-Accepted patterns (all punctuation and spaces optional, no double spaces):
+Accepted patterns (DDI optional, DDD required, punctuation and spaces flexible):
 
 ```
-^(\+?55 ?)? ?(\([1-9]{2}\)|[1-9]{2}) ?([2-5]\d{3}[-| ]?\d{4})$
+^(\+?55 ?)? ?(\([1-9]{2}\)|[1-9]{2}) ?([2-5]\d{3}[- ]?\d{4})$
 ```
 
 ### Creation
 
 ```csharp
-var landLine = new LandLine("5126352520");
-LandLine landLine = "5126352520";
-LandLine? landLine = null;
+var landLine = new LandLine("5136352520");
 
 // multiple input formats accepted
-LandLine landLine = "+55(51)2635-2520";
-LandLine landLine = "+55 (51) 2635-2520";
-LandLine landLine = "55 51 2635 2520";
+LandLine landLine = "+55(51)3635-2520";
+LandLine landLine = "+55 (51) 3635-2520";
+LandLine landLine = "51 3635 2520";
+
+LandLine? landLine = null; // nullable
 ```
+
+| Exception | Condition |
+|---|---|
+| `ArgumentNullException` | `null` or empty string |
+| `InvalidOperationException` | `null` assigned via implicit operator — use `LandLine?` |
+| `ArgumentOutOfRangeException` | format does not match ANATEL pattern |
 
 ### Properties
 
-```csharp
-LandLine landLine = "555126352520";
+`Raw` always returns the canonical form `CountryCode + AreaCode + Number`, regardless of the input format.
 
-Console.WriteLine((string)landLine);       // 555126352520
-Console.WriteLine(landLine.CountryCode);   // 55
-Console.WriteLine(landLine.AreaCode);      // 51
-Console.WriteLine(landLine.Number);        // 26352520
+```csharp
+LandLine landLine = "5136352520";
+
+Console.WriteLine(landLine.Raw);         // 555136352520
+Console.WriteLine(landLine.CountryCode); // 55
+Console.WriteLine(landLine.AreaCode);    // 51
+Console.WriteLine(landLine.Number);      // 36352520
+Console.WriteLine(landLine.ToString());  // +55 (51) 3635-2520
 ```
 
 ---
@@ -185,33 +197,106 @@ Console.WriteLine(landLine.Number);        // 26352520
 ## Mobile
 
 Brazilian mobile phone number in ANATEL standard format.
+First digit of the local number must be 9 (total of 9 digits).
 
-Accepted patterns (all punctuation and spaces optional, no double spaces):
+Accepted patterns (DDI optional, DDD required, punctuation and spaces flexible):
 
 ```
-^(\+?55 ?)? ?(\([1-9]{2}\)|[1-9]{2}) ?(9\d{4}[-| ]?\d{4})$
+^(\+?55 ?)? ?(\([1-9]{2}\)|[1-9]{2}) ?(9\d{4}[- ]?\d{4})$
 ```
 
 ### Creation
 
 ```csharp
-var mobile = new Mobile("51932321078");
-Mobile mobile = "51932321078";
-Mobile? mobile = null;
+var mobile = new Mobile("51936351064");
 
 // multiple input formats accepted
-Mobile mobile = "+55(51)93232-1078";
-Mobile mobile = "+55 (51) 93232-1078";
-Mobile mobile = "55 51 93232 1078";
+Mobile mobile = "+55(51)93635-1064";
+Mobile mobile = "+55 (51) 93635-1064";
+Mobile mobile = "51 93635 1064";
+
+Mobile? mobile = null; // nullable
 ```
+
+| Exception | Condition |
+|---|---|
+| `ArgumentNullException` | `null` or empty string |
+| `InvalidOperationException` | `null` assigned via implicit operator — use `Mobile?` |
+| `ArgumentOutOfRangeException` | format does not match ANATEL pattern |
+
+### Properties
+
+`Raw` always returns the canonical form `CountryCode + AreaCode + Number`, regardless of the input format.
+
+```csharp
+Mobile mobile = "51936351064";
+
+Console.WriteLine(mobile.Raw);         // 5551936351064
+Console.WriteLine(mobile.CountryCode); // 55
+Console.WriteLine(mobile.AreaCode);    // 51
+Console.WriteLine(mobile.Number);      // 936351064
+Console.WriteLine(mobile.ToString());  // +55 (51) 93635-1064
+```
+
+---
+
+## CardNumber
+
+Payment card number validated via the Luhn algorithm (mod 10).
+Accepts cards with 13 to 19 digits.
+
+### Creation
+
+```csharp
+var card = new CardNumber("4929622041254286");
+CardNumber card = "4929622041254286"; // implicit operator
+```
+
+| Exception | Condition |
+|---|---|
+| `ArgumentNullException` | `null` passed to constructor or `IsValid` |
+| `ArgumentException` | invalid length or Luhn check fails |
 
 ### Properties
 
 ```csharp
-Mobile mobile = "5551932321078";
+CardNumber card = "4929622041254286";
 
-Console.WriteLine((string)mobile);      // 5551932321078
-Console.WriteLine(mobile.CountryCode);  // 55
-Console.WriteLine(mobile.AreaCode);     // 51
-Console.WriteLine(mobile.Number);       // 932321078
+Console.WriteLine((string)card);    // 4929622041254286
+Console.WriteLine(card.Number);     // 4929622041254286
+Console.WriteLine(card.ToString()); // 4929 6220 4125 4286
+```
+
+### Static helpers
+
+```csharp
+CardNumber.IsValid("4929622041254286"); // true
+CardNumber.IsValid("49538528316877");   // false (Luhn fail)
+CardNumber.IsValid("123");             // false (too short)
+```
+
+---
+
+## JSON converters
+
+Converters for `System.Text.Json` are available in the `Person.Model.ValueObjects.Json` namespace
+for `LandLine`, `Mobile`, and `CardNumber`.
+
+```csharp
+// via JsonSerializerOptions
+var options = new JsonSerializerOptions();
+options.Converters.Add(new CardNumberConverter());
+
+// via attribute
+public class Payment
+{
+    [JsonConverter(typeof(CardNumberConverter))]
+    public CardNumber? CardNumber { get; set; }
+
+    [JsonConverter(typeof(MobileConverter))]
+    public Mobile Mobile { get; set; }
+
+    [JsonConverter(typeof(LandLineConverter))]
+    public LandLine? LandLine { get; set; }
+}
 ```
