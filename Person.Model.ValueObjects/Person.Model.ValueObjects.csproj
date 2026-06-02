@@ -5,19 +5,19 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Authors>Rafael Mac Menz</Authors>
 		<Company>McMenz IT</Company>
-		<Description>A .NET 8.0 collection with value objects that intend to model some Brazilian's Person domain properties</Description>
+		<Description>A .NET 10.0 collection with value objects that intend to model some Brazilian's Person domain properties</Description>
 		<NeutralLanguage>pt-BR</NeutralLanguage>
 		<RepositoryUrl>https://github.com/m4cm3nz/Person.Model.ValueObjects</RepositoryUrl>
 		<RepositoryType>c#</RepositoryType>
 		<PackageTags>value-object cnpj cpf mobile landline person</PackageTags>
-		<PackageReleaseNotes>upgrade to .net 8.0</PackageReleaseNotes>
+		<PackageReleaseNotes>upgrade to .net 10.0; CNPJ now supports the new alphanumeric format (IN RFB nº 2.229/2024)</PackageReleaseNotes>
 		<Copyright />
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
 		<PackageProjectUrl>https://github.com/m4cm3nz/Person.Model.ValueObjects</PackageProjectUrl>
 		<PackageReadmeFile>readme.md</PackageReadmeFile>
-		<Version>8.0.0</Version>
-		<AssemblyVersion>8.0.0.0</AssemblyVersion>
+		<Version>10.0.0</Version>
+		<AssemblyVersion>10.0.0.0</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
