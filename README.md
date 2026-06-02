@@ -1,275 +1,217 @@
 # Person.Model.ValueObjects
-A .NET 8.0 collection with value objects that intend to model some Brazilian's Person domain properties
 
-### Build your domain model using some value objects can save a lot of time and be can very useful:
-```c#
+A .NET 10.0 collection of value objects for modelling Brazilian person domain properties.
 
-public class Company {
-  public CNPJ CNPJ { get; set; }
-  public LandLine LandLine { get; set; }
+```csharp
+public class Company
+{
+    public CNPJ   CNPJ     { get; set; }
+    public LandLine LandLine { get; set; }
 }
 
-var company = new Company {
-  CNPJ = "39612247000102",
-  LandLine = "5136350020"
+var company = new Company
+{
+    CNPJ     = "39612247000102",
+    LandLine = "5136350020"
 };
 
-console.log(company.CNPJ);
-# 39.612.247/0001-02
+Console.WriteLine(company.CNPJ);            // 39.612.247/0001-02
+Console.WriteLine(company.CNPJ.Number);     // 396122470001
+Console.WriteLine(company.CNPJ.CheckNumber);// 02
 
-console.log(company.CNPJ.Number);
-# 396122470001
-
-console.log(company.CNPJ.CheckNumber);
-# 02
-
-console.log(company.LandLine);
-# +55 (51) 3635-0020
-
-console.log(company.LandLine.AreaCode);
-# 51
-
-console.log(company.LandLine.Number);
-# 36350020
-
+Console.WriteLine(company.LandLine);           // +55 (51) 3635-0020
+Console.WriteLine(company.LandLine.AreaCode);  // 51
+Console.WriteLine(company.LandLine.Number);    // 36350020
 ```
 
-## Employer Identification Number 
-CNPJ - Cadastro Nacional de Pessoa Jurídica  
-A string-based struct that models the Brazilian's Employer Identification Number
+---
 
-### CNPJ - Creation
-```c#
-// with new operator
+## CNPJ
+
+*Cadastro Nacional de Pessoa Jurídica* — Brazilian Employer Identification Number.
+
+A read-only struct that validates and models a CNPJ. Supports both the legacy
+numeric format and the **new alphanumeric format** introduced by
+[IN RFB nº 2.229/2024](https://www.gov.br/receitafederal), effective July 2026.
+
+**Format:** `[A-Z0-9]{12}[0-9]{2}` — the last two characters (check digits) are always numeric.
+Formatting characters (`.` `/` `-`) are stripped automatically on construction.
+Lowercase letters are **rejected** — the caller is responsible for casing.
+
+> **v2 breaking changes**
+> - `IsNumeric`, `IsFourteenLength`, `IsOutOfRange` removed from the public API.
+> - Static `GetNumberFrom(string)` and `GetCheckNumberFrom(string)` removed — use instance properties.
+> - `ToString()` now uses substring formatting for all formats (numeric and alphanumeric).
+> - Lowercase letters throw `ArgumentOutOfRangeException` instead of being silently uppercased.
+
+### Creation
+
+```csharp
+// constructor — with or without mask
 var cnpj = new CNPJ("39612247000102");
+var cnpj = new CNPJ("39.612.247/0001-02");
 
-// with string implicity operator
+// implicit operator
 CNPJ cnpj = "39612247000102";
 
-// can be nullable
-CNJP? cnpj = null;
+// nullable
+CNPJ? cnpj = null;
+
+// alphanumeric (effective July 2026)
+var cnpj = new CNPJ("AB123456000110");
 ```
 
-### CNPJ - Dismembering
-```c#
- CNPJ cnpj = "39612247000102";
- 
- console.log(cnpj.Raw);
- # 39612247000102
- 
- console.log(cnpj.Number);
- # 396122470001
- 
- console.log(cnpj.CheckNumber);
- # 02
+Throws:
+
+| Exception | Condition |
+|---|---|
+| `ArgumentNullException` | `null` passed to constructor |
+| `InvalidOperationException` | `null` assigned via implicit operator |
+| `ArgumentOutOfRangeException` | wrong length, invalid characters, or lowercase letters |
+| `InvalidCastException` | check digits do not match |
+
+### Properties
+
+```csharp
+CNPJ cnpj = "39612247000102";
+
+Console.WriteLine((string)cnpj);    // 39612247000102  (raw, implicit)
+Console.WriteLine(cnpj.Number);     // 396122470001
+Console.WriteLine(cnpj.CheckNumber);// 02
+Console.WriteLine(cnpj.ToString()); // 39.612.247/0001-02
 ```
 
-### CNPJ - Formatting
-```c#
- CNPJ cnpj = "39612247000102";
+Alphanumeric:
 
-// with ToString method
-console.log(cnpj.ToString());
-# 39.612.247\0001-02
+```csharp
+CNPJ cnpj = "AB123456000110";
 
-// with string implicity operator
-console.log(cnpj);
-# 39.612.247\0001-02
+Console.WriteLine((string)cnpj);    // AB123456000110
+Console.WriteLine(cnpj.Number);     // AB1234560001
+Console.WriteLine(cnpj.CheckNumber);// 10
+Console.WriteLine(cnpj.ToString()); // AB.123.456/0001-10
 ```
 
-### CNPJ - Helper Functions
-```c#
-// non-numeric
-CNPJ.IsNumeric("39 12247A00102");
-# false
+### Static helpers
 
-// not fourteen size length
-CNPJ.IsFourteenLength("396122470001020000");
-# false
+```csharp
+// validate without throwing
+CNPJ.IsValid("39612247000102");          // true
+CNPJ.IsValid("39.612.247/0001-02");      // true  (mask accepted)
+CNPJ.IsValid("AB123456000110");          // true  (alphanumeric)
+CNPJ.IsValid("39612237000102");          // false (wrong check digit)
+CNPJ.IsValid(null);                      // false
 
-// in range
-CNPJ.IsOutOfRange("39612247000102");
-# false
-
-// out of range
-// non-numeric or not forteend size length
-CNPJ.IsOutOfRange("396 K 224 0 SDDFG 010A0000");
-# true
-CNPJ.IsOutOfRange("396122470001020000");
-# true
-CNPJ.IsOutOfRange("39 12247A00102");
-# true
-
-// in range and valid cnpj
-CNPJ.IsValid("39612247000102");
-# true
-
-// get number part of cnpj in range candidate
-CNPJ.GetNumberFrom("39612247000102");
-# 396122470001
-
-// get check number part of in range cnpj candidate
-CNPJ.GetCheckNumberFrom("39612247000102");
-# 02
+// strip formatting characters only — does not change casing
+CNPJ.StripMask("39.612.247/0001-02");    // 39612247000102
+CNPJ.StripMask("AB.123.456/0001-10");    // AB123456000110
 ```
 
-## Social Security Number
-CPF - Cadastro de Pessoa Física  
-A string-based struct that models the Brazilian's Social Security Number  
+---
 
-### CPF - Creation
-```c#
-// with new operator
+## CPF
+
+*Cadastro de Pessoa Física* — Brazilian Social Security Number.
+
+### Creation
+
+```csharp
 var cpf = new CPF("99194415030");
-
-// with string implicity operator
 CPF cpf = "99194415030";
-
-// can be nullable
 CPF? cpf = null;
 ```
 
-### CPF - Dismembering
-```c#
- CPF cpf = "99194415030";
- 
- console.log(cpf.Raw);
- # 99194415030
- 
- console.log(cpf.Number);
- # 991944150
- 
- console.log(cpf.CheckNumber);
- # 30
-```
+### Properties
 
-### CPF - Formatting
-```c#
+```csharp
 CPF cpf = "99194415030";
 
-// with ToString method
-console.log(cpf.ToString());
-# 991.944.150-30
-
-// with string implicity operator
-console.log(cpf);
-# 991.944.150-30
+Console.WriteLine((string)cpf);     // 99194415030
+Console.WriteLine(cpf.Number);      // 991944150
+Console.WriteLine(cpf.CheckNumber); // 30
+Console.WriteLine(cpf.ToString());  // 991.944.150-30
 ```
 
-### CPF - Helper Functions
-```c#
-// non-numeric
-CPF.IsNumeric("991 94 415 030");
-# false
+### Static helpers
 
-// not eleven size length
-CPF.IsElevenLength("991944150302342");
-# false
-
-// in range
-CPF.IsOutOfRange("99194415030");
-# false
-
-// out of range
-// non-numeric or not eleven size length
-CPF.IsOutOfRange("991 944 ABC 1503024332423");
-# true
-CPF.IsOutOfRange("99194415030243");
-# true
-CPF.IsOutOfRange("991944 ABC 150");
-# true
-
-// in range and valid cnpj
-CPF.IsValid("99194415030");
-# true
-
-// get number part of cnpj in range candidate
-CPF.GetNumberFrom("99194415030");
-# 991944150
-
-// get check number part of in range cnpj candidate
-CPF.GetCheckNumberFrom("99194415030");
-# 30
+```csharp
+CPF.IsNumeric("991 94 415 030");         // false
+CPF.IsElevenLength("991944150302342");   // false
+CPF.IsOutOfRange("99194415030");         // false
+CPF.IsOutOfRange("991 944 ABC 150");     // true
+CPF.IsValid("99194415030");              // true
+CPF.GetNumberFrom("99194415030");        // 991944150
+CPF.GetCheckNumberFrom("99194415030");   // 30
 ```
 
-## Land Line Phone Number
-A string-based struct that models the Brazilian's land line phone number in ANATEL's standard format
+---
 
-### Land Line - Creation
-```c#
-// with new operator
+## LandLine
+
+Brazilian landline phone number in ANATEL standard format.
+
+Accepted patterns (all punctuation and spaces optional, no double spaces):
+
+```
+^(\+?55 ?)? ?(\([1-9]{2}\)|[1-9]{2}) ?([2-5]\d{3}[-| ]?\d{4})$
+```
+
+### Creation
+
+```csharp
 var landLine = new LandLine("5126352520");
-
-// with string implicity operator
 LandLine landLine = "5126352520";
-
-// can be null
 LandLine? landLine = null;
 
-// accept mutiple formats on creation
-// all the signs and spaces are optional
-// it does not accept double spaces.
-// ^(\+?55 ?)? ?(\([1-9]{2}\)|[1-9]{2}) ?([2-5]\d{3}[-| ]?\d{4})$
-
+// multiple input formats accepted
 LandLine landLine = "+55(51)2635-2520";
 LandLine landLine = "+55 (51) 2635-2520";
 LandLine landLine = "55 51 2635 2520";
 ```
 
-### Land Line - Dismembering
-```c#
- LandLine landLine = "555126352520";
- 
- console.log(landLine.Raw);
- # 555126352520
- 
- console.log(landLine.CountryCode);
- # 55
- 
- console.log(landLine.AreaCode);
- # 51
+### Properties
 
-console.log(landLine.Number);
-# 26352520
+```csharp
+LandLine landLine = "555126352520";
+
+Console.WriteLine((string)landLine);       // 555126352520
+Console.WriteLine(landLine.CountryCode);   // 55
+Console.WriteLine(landLine.AreaCode);      // 51
+Console.WriteLine(landLine.Number);        // 26352520
 ```
 
-## Mobile Phone Number
-A string-based struct that models the Brazilian's mobile phone number in ANATEL's standard format
+---
 
-### Mobile - Creation
-```c#
-// with new operator
+## Mobile
+
+Brazilian mobile phone number in ANATEL standard format.
+
+Accepted patterns (all punctuation and spaces optional, no double spaces):
+
+```
+^(\+?55 ?)? ?(\([1-9]{2}\)|[1-9]{2}) ?(9\d{4}[-| ]?\d{4})$
+```
+
+### Creation
+
+```csharp
 var mobile = new Mobile("51932321078");
-
-// with string implicity operator
 Mobile mobile = "51932321078";
-
-// can be null
 Mobile? mobile = null;
 
-// accept mutiple formats on creation
-// all the signs and spaces are optional
-// it does not accept double spaces.
-// ^(\+?55 ?)? ?(\([1-9]{2}\)|[1-9]{2}) ?(9\d{4}[-| ]?\d{4})$
-
+// multiple input formats accepted
 Mobile mobile = "+55(51)93232-1078";
 Mobile mobile = "+55 (51) 93232-1078";
 Mobile mobile = "55 51 93232 1078";
 ```
 
-### Mobile - Dismembering
-```c#
- Mobile mobile = "5551932321078";
- 
- console.log(mobile.Raw);
- # 5551932321078
- 
- console.log(mobile.CountryCode);
- # 55
- 
- console.log(mobile.AreaCode);
- # 51
+### Properties
 
-console.log(mobile.Number);
-# 932321078
+```csharp
+Mobile mobile = "5551932321078";
+
+Console.WriteLine((string)mobile);      // 5551932321078
+Console.WriteLine(mobile.CountryCode);  // 55
+Console.WriteLine(mobile.AreaCode);     // 51
+Console.WriteLine(mobile.Number);       // 932321078
 ```

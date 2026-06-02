@@ -1,125 +1,120 @@
-﻿using System;
+﻿// CPF.cs
+using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Person.Model.ValueObjects
 {
     [Serializable]
-    public struct CPF
+    public readonly struct CPF : IEquatable<CPF>
     {
-        private static readonly int CheckNumberLength = 2;
-        private static readonly int NumberLength = 9;
-        private static readonly int CPFLength = CheckNumberLength + NumberLength;
+        private const int CheckNumberLength = 2;
+        private const int NumberLength = 9;
+        private const int CpfLength = CheckNumberLength + NumberLength;
+        private const int Modulus = 11;
 
-        private readonly string Raw => Number + CheckNumber;
-        public string Number { get; set; }
-        public string CheckNumber { get; set; }
+        private static readonly Regex FormatMask =
+            new Regex(@"^\d{11}$", RegexOptions.Compiled);
 
-        public static implicit operator string(CPF number) => number.Raw;
+        public string Number { get; }
+        public string CheckNumber { get; }
 
-        public static implicit operator CPF(string number)
+        private string Raw => Number + CheckNumber;
+
+        public static implicit operator string(CPF cpf) => cpf.Raw;
+
+        public static implicit operator CPF(string value) => value is null ?
+            throw new InvalidOperationException():
+            new (value);
+
+        public static implicit operator CPF?(string value)
         {
-            number = number ??
-                throw new InvalidOperationException(
-                    $"Para valores nulos utilize Nullable<{typeof(CPF).Name}>");
-
-            return new CPF(number);
+            if(value == null ) return null;
+            return new CPF(value);
         }
 
-        public CPF(string number)
+        public CPF(string value)
         {
-            GuardArgument(number);
+            if (value is null)
+                throw new ArgumentNullException(nameof(value),
+                    "Não é possível criar um CPF a partir de um valor nulo.");
 
-            if (!Internal.IsValid(number))
+            value = StripMask(value);
+
+            if (!FormatMask.IsMatch(value))
+                throw new ArgumentOutOfRangeException(nameof(value),
+                    $"Formato inválido. Esperado: string numérica de {CpfLength} dígitos.");
+
+            if (!Internal.IsValid(value))
                 throw new InvalidCastException(
                     "A cadeia de caracteres informada não corresponde a um CPF válido.");
 
-            Number = Internal.GetNumberFrom(number);
-            CheckNumber = Internal.GetCheckNumberFrom(number);
+            Number = value[..NumberLength];
+            CheckNumber = value[NumberLength..];
         }
 
-        public override readonly string ToString()
+        public override string ToString() =>
+            $"{Raw[..3]}.{Raw[3..6]}.{Raw[6..9]}-{Raw[9..]}";
+
+        public static bool IsValid(string value)
         {
-            return Convert.ToUInt64(Raw).ToString(@"000\.000\.000\-00");
+            if (value is null) return false;
+            value = StripMask(value);
+            return FormatMask.IsMatch(value) && Internal.IsValid(value);
         }
 
-        private static void GuardArgument(string number)
-        {
-            if (number == null)
-                throw new ArgumentNullException(nameof(number),
-                    "Não é possível criar um CPF a partir de um valor nulo.");
+        public static string StripMask(string value) =>
+            value.Replace(".", "").Replace("-", "").Trim();
 
-            if (IsOutOfRange(number))
-                throw new ArgumentOutOfRangeException(
-                    nameof(number), $"Era esperado uma string numérica de {CPFLength} dígitos");
+        public static bool IsNumeric(string value) => value.All(char.IsNumber);
+        public static bool IsElevenLength(string value) => value.Length == CpfLength;
+        public static bool IsOutOfRange(string value) => !IsElevenLength(value) || !IsNumeric(value);
+
+        public static string GetNumberFrom(string value)
+        {
+            if (value is null) throw new ArgumentNullException(nameof(value));
+            value = StripMask(value);
+            if (IsOutOfRange(value)) throw new ArgumentOutOfRangeException(nameof(value));
+            return value[..NumberLength];
         }
 
-        public static bool IsOutOfRange(string number) =>
-            !(IsElevenLength(number) && IsNumeric(number));
-
-        public static bool IsNumeric(string value) =>
-            value.All(char.IsNumber);
-
-        public static bool IsElevenLength(string value) =>
-            value.Length == CPFLength;
-
-        public static string GetCheckNumberFrom(string number)
+        public static string GetCheckNumberFrom(string value)
         {
-            GuardArgument(number);
-            return Internal.GetCheckNumberFrom(number);
+            if (value is null) throw new ArgumentNullException(nameof(value));
+            value = StripMask(value);
+            if (IsOutOfRange(value)) throw new ArgumentOutOfRangeException(nameof(value));
+            return value[NumberLength..];
         }
 
-        public static string GetNumberFrom(string number)
-        {
-            GuardArgument(number);
-            return Internal.GetNumberFrom(number);
-        }
-        public static bool IsValid(string number)
-        {
-            return !IsOutOfRange(number) && Internal.IsValid(number);
-        }
+        public bool Equals(CPF other) => Raw == other.Raw;
+        public override bool Equals(object obj) => obj is CPF other && Equals(other);
+        public override int GetHashCode() => Raw.GetHashCode();
 
-        private class Internal
+        public static bool operator ==(CPF left, CPF right) => left.Equals(right);
+        public static bool operator !=(CPF left, CPF right) => !left.Equals(right);
+
+        private static class Internal
         {
-            public static string GetCheckNumberFrom(string number)
+            public static bool IsValid(string cpf)
             {
-                return number?.Substring(NumberLength, CheckNumberLength);
+                if (cpf.Distinct().Count() == 1)
+                    return false;
+
+                int[] root = cpf[..NumberLength].Select(c => c - '0').ToArray();
+
+                int digit1 = CheckDigit(root);
+                int digit2 = CheckDigit([.. root, digit1]);
+
+                return (cpf[9] - '0') == digit1
+                    && (cpf[10] - '0') == digit2;
             }
 
-            public static string GetNumberFrom(string number)
+            private static int CheckDigit(int[] values)
             {
-                return number?[..NumberLength];
-            }
-
-            public static bool IsValid(string number)
-            {
-                var numberArray = GetNumberFrom(number)
-                    .ToCharArray()
-                    .Select(x => int.Parse(x.ToString()))
-                    .ToArray();
-
-                var firstDigit = GetCheckDigitFrom(numberArray);
-
-                numberArray = [.. numberArray, firstDigit];
-
-                var secondDigit = GetCheckDigitFrom(numberArray);
-
-                return number == string.Join("", numberArray.Append(secondDigit));
-            }
-
-            private static int GetCheckDigitFrom(int[] numberArray)
-            {
-                var summation = 0;
-                int maxLoops = numberArray.Length;
-                int weight = maxLoops + 1;
-
-                for (var index = 0; index < maxLoops; index++)
-                    summation += (numberArray[index] * weight--);
-
-                var remainder = (summation % CPFLength);
-
-                return remainder < CheckNumberLength ?
-                    default :
-                    CPFLength - remainder;
+                int weight = values.Length + 1;
+                int sum = values.Sum(v => v * weight--);
+                int remainder = sum % Modulus;
+                return remainder < CheckNumberLength ? 0 : Modulus - remainder;
             }
         }
     }

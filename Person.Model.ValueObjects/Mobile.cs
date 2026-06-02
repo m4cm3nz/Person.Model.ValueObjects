@@ -1,40 +1,28 @@
-﻿using System;
+﻿// Mobile.cs
+using System;
 using System.Text.RegularExpressions;
 
 namespace Person.Model.ValueObjects
 {
-    /// <summary>
-    /// Representa um número de telefone móvel 
-    /// respeitando a codificação brasileira definida pela ANATEL, 
-    /// nos formatos atendidos pela expressão regular:
-    /// ^(\+?55 ?)? ?(\([1-9]{2}\)|[1-9]{2}) ?(9\d{4}[-| ]?\d{4})$
-    /// </summary>
     [Serializable]
-    public partial struct Mobile : IPhoneNumber
+    public struct Mobile : IPhoneNumber, IEquatable<Mobile>
     {
-        private static readonly string DefaultCountryCode = "55";
-
-        private static readonly string Pattern =
+        private const string DefaultCountryCode = "55";
+        private const string Pattern =
             @"^(\+?55 ?)? ?(\([1-9]{2}\)|[1-9]{2}) ?(9\d{4}[-| ]?\d{4})$";
-
-        private static readonly string Message =
+        private const string InvalidMessage =
             "O celular informado é inválido ou está em um formato incorreto.";
 
-        [GeneratedRegex(@"[0-9]+")]
-        private static partial Regex OnlyNumbers();
+        private static readonly Regex OnlyNumbers =
+            new(@"[0-9]+", RegexOptions.Compiled);
 
-        public static string GetOnlyNumbersFrom(string value) =>
-            string.Join(null, OnlyNumbers().Matches(value));
+        private static string ExtractDigits(string value) =>
+            string.Join(null, OnlyNumbers.Matches(value));
 
-        public override readonly string ToString()
-        {
-            return $"+{CountryCode} ({AreaCode} {Number[..5]} {Number.Substring(5, 4)})";
-        }
-
-        public string Raw { get; private set; }
-        public string CountryCode { get; set; }
-        public string AreaCode { get; private set; }
-        public string Number { get; private set; }
+        public string Raw { get; }
+        public string CountryCode { get; }
+        public string AreaCode { get; }
+        public string Number { get; }
 
         public Mobile(string phoneNumber)
         {
@@ -44,23 +32,34 @@ namespace Person.Model.ValueObjects
             var match = Regex.Match(phoneNumber, Pattern);
 
             if (!match.Success)
-                throw new ArgumentOutOfRangeException(nameof(phoneNumber), Message);
+                throw new ArgumentOutOfRangeException(nameof(phoneNumber), InvalidMessage);
 
-            CountryCode = GetOnlyNumbersFrom(match.Groups[1].Value);
-            CountryCode = string.IsNullOrEmpty(CountryCode) ? DefaultCountryCode : CountryCode;
-            AreaCode = GetOnlyNumbersFrom(match.Groups[2].Value);
-            Number = GetOnlyNumbersFrom(match.Groups[3].Value);
-            Raw = phoneNumber;
+            var country = ExtractDigits(match.Groups[1].Value);
+
+            CountryCode = string.IsNullOrEmpty(country) ? DefaultCountryCode : country;
+            AreaCode = ExtractDigits(match.Groups[2].Value);
+            Number = ExtractDigits(match.Groups[3].Value);
+            Raw = ExtractDigits(phoneNumber);
         }
 
-        public static implicit operator string(Mobile phoneNumber) => phoneNumber.Raw;
-        public static implicit operator Mobile(string phoneNumber)
+        public override readonly string ToString() =>
+            $"+{CountryCode} ({AreaCode}) {Number[..5]}-{Number[5..]}";
+
+        public static implicit operator string(Mobile phone) => phone.Raw;
+
+        public static implicit operator Mobile(string phone)
         {
-            phoneNumber = phoneNumber ??
-                throw new InvalidOperationException(
-                    $"Para valores nulos utilize Nullable<{typeof(Mobile).Name}>");
+            _ = phone ?? throw new InvalidOperationException(
+                $"Para valores nulos utilize Nullable<{typeof(Mobile).Name}>.");
 
-            return new Mobile(phoneNumber);
+            return new Mobile(phone);
         }
+
+        public bool Equals(Mobile other) => Raw == other.Raw;
+        public override bool Equals(object obj) => obj is Mobile other && Equals(other);
+        public override readonly int GetHashCode() => Raw.GetHashCode();
+
+        public static bool operator ==(Mobile left, Mobile right) => left.Equals(right);
+        public static bool operator !=(Mobile left, Mobile right) => !left.Equals(right);
     }
 }
