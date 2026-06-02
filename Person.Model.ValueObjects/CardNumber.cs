@@ -3,12 +3,22 @@ using System.Text;
 
 namespace Person.Model.ValueObjects
 {
+    /// <summary>
+    /// Representa um número de cartão de pagamento válido como value object imutável.
+    /// Valida o número via algoritmo de Luhn (mod 10). Aceita cartões de 13 a 19 dígitos.
+    /// </summary>
     public readonly struct CardNumber : IEquatable<CardNumber>
     {
         private readonly string _number;
 
+        /// <summary>Número do cartão sem formatação.</summary>
         public string Number => _number;
 
+        /// <summary>
+        /// Constrói um CardNumber a partir de uma string de dígitos.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">Quando <paramref name="number"/> é nulo.</exception>
+        /// <exception cref="ArgumentException">Quando o número falha na validação de Luhn ou tem comprimento inválido.</exception>
         public CardNumber(string number)
         {
             if (number is null)
@@ -25,6 +35,10 @@ namespace Person.Model.ValueObjects
         public static implicit operator CardNumber(string cardNumber) =>
             new(cardNumber);
 
+        /// <summary>
+        /// Retorna o número formatado em grupos de 4 dígitos separados por espaço.
+        /// Exemplo: <c>4929 6220 4125 4286</c>.
+        /// </summary>
         public override string ToString()
         {
             var sb = new StringBuilder(_number.Length + _number.Length / 4);
@@ -36,6 +50,12 @@ namespace Person.Model.ValueObjects
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Valida uma string como número de cartão via algoritmo de Luhn.
+        /// Retorna <see langword="false"/> para strings com comprimento fora do intervalo 13–19
+        /// ou com caracteres não numéricos.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">Quando <paramref name="cardNumber"/> é nulo.</exception>
         public static bool IsValid(string cardNumber)
         {
             if (cardNumber is null) throw new ArgumentNullException(nameof(cardNumber));

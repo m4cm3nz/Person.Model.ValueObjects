@@ -4,6 +4,11 @@ using System.Text.RegularExpressions;
 
 namespace Person.Model.ValueObjects
 {
+    /// <summary>
+    /// Representa um CPF válido como value object imutável.
+    /// Formato: 9 dígitos de raiz + 2 dígitos verificadores (total 11 dígitos numéricos).
+    /// Aceita entrada com ou sem máscara (<c>123.456.789-09</c>).
+    /// </summary>
     public readonly struct CPF : IEquatable<CPF>
     {
         private const int CheckNumberLength = 2;
@@ -16,11 +21,18 @@ namespace Person.Model.ValueObjects
 
         private readonly string _raw;
 
+        /// <summary>Os 9 primeiros dígitos: raiz do contribuinte.</summary>
         public string Number { get; }
+
+        /// <summary>Os 2 dígitos verificadores.</summary>
         public string CheckNumber { get; }
 
         public static implicit operator string(CPF cpf) => cpf._raw;
 
+        /// <exception cref="InvalidOperationException">
+        /// Lançada quando <see langword="null"/> é atribuído via conversão implícita.
+        /// Use <see cref="Nullable{CPF}"/> para representar ausência de valor.
+        /// </exception>
         public static implicit operator CPF(string value) => value is null
             ? throw new InvalidOperationException("Para valores nulos utilize CPF?.")
             : new(value);
@@ -31,6 +43,13 @@ namespace Person.Model.ValueObjects
             return new CPF(value);
         }
 
+        /// <summary>
+        /// Constrói um CPF a partir de uma string com ou sem máscara de formatação.
+        /// Pontos e hífen são removidos automaticamente.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">Quando <paramref name="value"/> é nulo.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Quando o formato é inválido (não numérico ou comprimento incorreto).</exception>
+        /// <exception cref="InvalidCastException">Quando os dígitos verificadores não conferem.</exception>
         public CPF(string value)
         {
             if (value is null)
@@ -52,9 +71,14 @@ namespace Person.Model.ValueObjects
             _raw = value;
         }
 
+        /// <summary>Retorna o CPF formatado com máscara: <c>XXX.XXX.XXX-XX</c>.</summary>
         public override string ToString() =>
             $"{_raw[..3]}.{_raw[3..6]}.{_raw[6..9]}-{_raw[9..]}";
 
+        /// <summary>
+        /// Valida uma string como CPF sem lançar exceção.
+        /// Remove máscara automaticamente antes de validar.
+        /// </summary>
         public static bool IsValid(string value)
         {
             if (value is null) return false;
@@ -62,6 +86,7 @@ namespace Person.Model.ValueObjects
             return FormatMask.IsMatch(value) && Internal.IsValid(value);
         }
 
+        /// <summary>Remove os caracteres de máscara (<c>.</c> e <c>-</c>) da string.</summary>
         public static string StripMask(string value) =>
             value.Replace(".", "").Replace("-", "").Trim();
 

@@ -3,6 +3,15 @@ using System.Text.RegularExpressions;
 
 namespace Person.Model.ValueObjects
 {
+    /// <summary>
+    /// Representa um número de telefone fixo brasileiro válido como value object imutável.
+    /// Aceita DDI +55 (opcional), DDD de dois dígitos e número no padrão ANATEL para
+    /// telefones fixos (primeiro dígito entre 2 e 5).
+    /// <para>
+    /// <see cref="Raw"/> sempre retorna a forma canônica <c>CountryCode + AreaCode + Number</c>,
+    /// independentemente do formato de entrada.
+    /// </para>
+    /// </summary>
     public readonly struct LandLine : IPhoneNumber, IEquatable<LandLine>
     {
         private const string DefaultCountryCode = "55";
@@ -17,11 +26,23 @@ namespace Person.Model.ValueObjects
         private static string ExtractDigits(string value) =>
             string.Join(null, OnlyNumbers.Matches(value));
 
+        /// <summary>Forma canônica: <c>CountryCode + AreaCode + Number</c> (somente dígitos).</summary>
         public string Raw { get; }
+
+        /// <summary>DDI. Padrão <c>"55"</c> quando não informado na entrada.</summary>
         public string CountryCode { get; }
+
+        /// <summary>DDD com dois dígitos.</summary>
         public string AreaCode { get; }
+
+        /// <summary>Número local com oito dígitos.</summary>
         public string Number { get; }
 
+        /// <summary>
+        /// Constrói um LandLine a partir de uma string em qualquer formato aceito.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">Quando <paramref name="phoneNumber"/> é nulo ou vazio.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Quando o formato não corresponde ao padrão ANATEL.</exception>
         public LandLine(string phoneNumber)
         {
             if (string.IsNullOrEmpty(phoneNumber))
@@ -40,11 +61,16 @@ namespace Person.Model.ValueObjects
             Raw = CountryCode + AreaCode + Number;
         }
 
+        /// <summary>Retorna o telefone formatado: <c>+55 (51) 3635-2520</c>.</summary>
         public override string ToString() =>
             $"+{CountryCode} ({AreaCode}) {Number[..4]}-{Number[4..]}";
 
         public static implicit operator string(LandLine phone) => phone.Raw;
 
+        /// <exception cref="InvalidOperationException">
+        /// Lançada quando <see langword="null"/> é atribuído via conversão implícita.
+        /// Use <see cref="Nullable{LandLine}"/> para representar ausência de valor.
+        /// </exception>
         public static implicit operator LandLine(string phone)
         {
             _ = phone ?? throw new InvalidOperationException(
