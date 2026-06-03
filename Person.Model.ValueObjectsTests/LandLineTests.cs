@@ -125,6 +125,52 @@ namespace Person.Model.ValueObjects.Tests
         }
 
         // ------------------------------------------------------------------ //
+        // Equality                                                           //
+        // ------------------------------------------------------------------ //
+
+        [Test]
+        public void EqualityBetweenEquivalentFormatsTest()
+        {
+            LandLine a = new("5136352520");
+            LandLine b = new("+55 (51) 3635-2520");
+
+            Assert.That(a, Is.EqualTo(b));
+            Assert.That(a == b, Is.True);
+            Assert.That(a != b, Is.False);
+            Assert.That(a.GetHashCode(), Is.EqualTo(b.GetHashCode()));
+        }
+
+        [Test]
+        public void InequalityBetweenDifferentLandLinesTest()
+        {
+            LandLine a = new("5136352520");
+            LandLine b = new("5136350020");
+
+            Assert.That(a != b, Is.True);
+        }
+
+        // ------------------------------------------------------------------ //
+        // Default struct                                                      //
+        // ------------------------------------------------------------------ //
+
+        [Test]
+        public void DefaultToStringReturnsEmptyTest()
+        {
+            Assert.That(default(LandLine).ToString(), Is.EqualTo(string.Empty));
+        }
+
+        // ------------------------------------------------------------------ //
+        // DoS — max input length                                              //
+        // ------------------------------------------------------------------ //
+
+        [Test]
+        public void InputExceedingMaxLengthIsRejectedTest()
+        {
+            var oversized = new string('5', 31);
+            Assert.Throws<ArgumentOutOfRangeException>(() => new LandLine(oversized));
+        }
+
+        // ------------------------------------------------------------------ //
         // Nullable                                                            //
         // ------------------------------------------------------------------ //
 

@@ -128,5 +128,51 @@ namespace Person.Model.ValueObjects.Tests
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => new Mobile(phone));
         }
+
+        // ------------------------------------------------------------------ //
+        // Equality                                                            //
+        // ------------------------------------------------------------------ //
+
+        [Test]
+        public void EqualityBetweenEquivalentFormatsTest()
+        {
+            Mobile a = new("51936351064");
+            Mobile b = new("+55 (51) 93635-1064");
+
+            Assert.That(a, Is.EqualTo(b));
+            Assert.That(a == b, Is.True);
+            Assert.That(a != b, Is.False);
+            Assert.That(a.GetHashCode(), Is.EqualTo(b.GetHashCode()));
+        }
+
+        [Test]
+        public void InequalityBetweenDifferentMobilesTest()
+        {
+            Mobile a = new("51936351064");
+            Mobile b = new("51987654321");
+
+            Assert.That(a != b, Is.True);
+        }
+
+        // ------------------------------------------------------------------ //
+        // Default struct                                                      //
+        // ------------------------------------------------------------------ //
+
+        [Test]
+        public void DefaultToStringReturnsEmptyTest()
+        {
+            Assert.That(default(Mobile).ToString(), Is.EqualTo(string.Empty));
+        }
+
+        // ------------------------------------------------------------------ //
+        // DoS — max input length                                              //
+        // ------------------------------------------------------------------ //
+
+        [Test]
+        public void InputExceedingMaxLengthIsRejectedTest()
+        {
+            var oversized = new string('5', 31);
+            Assert.Throws<ArgumentOutOfRangeException>(() => new Mobile(oversized));
+        }
     }
 }
