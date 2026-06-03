@@ -1,12 +1,17 @@
 # Changelog
 
-## [10.0.0] — 2026-06-02
+## [10.0.0-preview.1] — 2026-06-02
 
 ### Breaking changes
+
+#### All value objects
+- `[Serializable]` attribute removed. Code relying on `BinaryFormatter` or runtime serialization must be updated.
 
 #### CNPJ
 - Lowercase letters now throw `ArgumentOutOfRangeException` instead of being silently normalized.
 - `ToString()` uses substring-based formatting for all formats, including alphanumeric (`AB.123.456/0001-10`).
+- `IsNumeric(string)`, `IsFourteenLength(string)`, and `IsOutOfRange(string)` removed from the public API.
+- `GetNumberFrom(string)` and `GetCheckNumberFrom(string)` removed from the public API — use the `Number` and `CheckNumber` instance properties instead.
 
 #### CPF
 - `IsNumeric(string)`, `IsElevenLength(string)`, and `IsOutOfRange(string)` removed from the public API.
@@ -14,6 +19,11 @@
 
 #### LandLine / Mobile
 - `Raw` now always returns the canonical form `CountryCode + AreaCode + Number`, regardless of the input format. Code that relied on `Raw` returning the exact digits of the original input needs to be updated.
+- `GetOnlyNumbersFrom(string)` removed from the public API — digit extraction is now internal.
+- `ToString()` format corrected: now returns `+55 (51) 3635-2520` (area code in parentheses, hyphen in local number). The previous format was `+55 (51 3635 2520)`.
+
+#### JSON converters (LandLine / Mobile)
+- `LandLineConverter` and `MobileConverter` previously serialized a JSON object (`{"Raw":"...","CountryCode":"...","AreaCode":"...","Number":"..."}`). They now serialize as a plain JSON string (the canonical `Raw` value), consistent with `CardNumberConverter`. Existing payloads produced with the old converters are **not** compatible with this version.
 
 ---
 
@@ -59,12 +69,10 @@ CNPJ.IsValid("AB123456000110");      // true
 
 ### Bug fixes
 
-- **CardNumber.IsValid**: `NullReferenceException` when receiving `null` replaced by `ArgumentNullException`.
+- **CardNumber.IsValid**: now returns `false` for `null` input (consistent with `CNPJ.IsValid` and `CPF.IsValid`), replacing the previous `NullReferenceException`.
 - **LandLine / Mobile**: inconsistent equality between instances of the same number in different input formats (see `Raw` breaking change above).
 - **All value objects**: `\d` in regex patterns replaced with `[0-9]` — `\d` in .NET matches any Unicode decimal digit (Arabic-Indic, Devanagari, etc.), not just ASCII digits. This prevented nonsense input from being correctly rejected.
 - **All value objects**: `default(T).ToString()` now returns `string.Empty` instead of throwing `NullReferenceException`. The default struct state (uninitialized) is a known C# limitation; the null guard makes it safe for use in collections and nullable contexts.
-- **CardNumber.IsValid**: now returns `false` for `null` input (consistent with `CNPJ.IsValid` and `CPF.IsValid`) instead of throwing `ArgumentNullException`.
-- **JSON converters (LandLine / Mobile)**: `PhoneNumberFactory.Write` previously serialized a JSON object (`{"Raw":"...","CountryCode":"...","AreaCode":"...","Number":"..."}`); deserialization read only the `"Raw"` field, making the serialization asymmetric and brittle. Both converters now serialize as a plain JSON string (the canonical `Raw` value), consistent with `CardNumberConverter`. **This is a breaking change for any existing serialized JSON payload using these converters.**
 
 ---
 

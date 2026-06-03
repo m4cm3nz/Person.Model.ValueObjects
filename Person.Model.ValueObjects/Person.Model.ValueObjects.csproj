@@ -6,22 +6,23 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Authors>Rafael Mac Menz</Authors>
 		<Company>McMenz IT</Company>
-		<Description>A .NET 10.0 collection with value objects that intend to model some Brazilian's Person domain properties</Description>
+		<Description>A .NET 10.0 collection with value objects that model Brazilian person domain properties</Description>
 		<NeutralLanguage>pt-BR</NeutralLanguage>
 		<RepositoryUrl>https://github.com/m4cm3nz/Person.Model.ValueObjects</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<PackageTags>value-object cnpj cpf mobile landline person</PackageTags>
+		<PackageTags>value-object cnpj cpf mobile landline cardnumber luhn brazil brazilian person</PackageTags>
 		<PackageReleaseNotes>See CHANGELOG.md</PackageReleaseNotes>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
 		<PackageProjectUrl>https://github.com/m4cm3nz/Person.Model.ValueObjects</PackageProjectUrl>
 		<PackageReadmeFile>readme.md</PackageReadmeFile>
-		<Version>10.0.0</Version>
+		<Version>10.0.0-preview.1</Version>
 		<AssemblyVersion>10.0.0.0</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<None Include="..\readme.md" Pack="true" PackagePath="\" />
+		<None Include="..\CHANGELOG.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
 </Project>

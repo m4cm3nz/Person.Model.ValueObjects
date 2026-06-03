@@ -137,7 +137,9 @@ namespace Person.Model.ValueObjects.Tests
         // ------------------------------------------------------------------ //
 
         [Test]
-        [TestCase("4929622041254286", "**** **** **** 4286")]
+        [TestCase("4929622041254286", "**** **** **** 4286")]  // Visa 16
+        [TestCase("38538228319872",   "**** **** **98 72")]    // Diners 14
+        [TestCase("371449635398431",  "**** **** ***8 431")]   // AmEx 15
         public void ToStringFormatsCorrectlyTest(string number, string expected)
         {
             CardNumber cardNumber = number;
@@ -146,12 +148,20 @@ namespace Person.Model.ValueObjects.Tests
         }
 
         [Test]
-        [TestCase("4929622041254286", "4929 6220 4125 4286")]
+        [TestCase("4929622041254286", "4929 6220 4125 4286")]  // Visa 16
+        [TestCase("38538228319872",   "3853 8228 3198 72")]    // Diners 14
+        [TestCase("371449635398431",  "3714 4963 5398 431")]   // AmEx 15
         public void ToFormattedReturnsFullNumberTest(string number, string expected)
         {
             CardNumber cardNumber = number;
 
             Assert.That(cardNumber.ToFormatted(), Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void DefaultToStringReturnsEmptyTest()
+        {
+            Assert.That(default(CardNumber).ToString(), Is.EqualTo(string.Empty));
         }
 
         // ------------------------------------------------------------------ //

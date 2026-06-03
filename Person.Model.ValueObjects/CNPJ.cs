@@ -13,10 +13,12 @@ namespace Person.Model.ValueObjects
     /// for casing before constructing the value.
     /// </para>
     /// <para>
-    /// <b>v2 breaking changes:</b>
+    /// <b>v10 breaking changes:</b>
     /// <list type="bullet">
     ///   <item><description><c>ToString()</c> uses alphanumeric mask for all formats (<c>AB.123.456/0001-00</c>).</description></item>
     ///   <item><description>Lowercase letters throw <c>ArgumentOutOfRangeException</c> instead of being silently uppercased.</description></item>
+    ///   <item><description>Internal helper methods (<c>IsNumeric</c>, <c>IsFourteenLength</c>, <c>IsOutOfRange</c>, <c>GetNumberFrom</c>, <c>GetCheckNumberFrom</c>) removed from the public API.</description></item>
+    ///   <item><description><c>[Serializable]</c> attribute removed.</description></item>
     /// </list>
     /// </para>
     /// <see href="https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/perguntas-e-respostas/cnpj/cnpj-alfanumerico.pdf"/>

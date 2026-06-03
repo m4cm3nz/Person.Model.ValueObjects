@@ -38,9 +38,10 @@ numeric format and the **new alphanumeric format** introduced by
 Formatting characters (`.` `/` `-`) are stripped automatically on construction.
 Lowercase letters are **rejected** — the caller is responsible for casing.
 
-> **v2 breaking changes**
+> **v10 breaking changes**
 > - `ToString()` now uses alphanumeric mask for all formats (`AB.123.456/0001-10`).
 > - Lowercase letters throw `ArgumentOutOfRangeException` instead of being silently uppercased.
+> - Internal helper methods (`IsNumeric`, `IsFourteenLength`, `IsOutOfRange`, `GetNumberFrom`, `GetCheckNumberFrom`) removed from the public API.
 
 ### Creation
 
@@ -156,7 +157,7 @@ First digit of the local number must be between 2 and 5.
 Accepted patterns (DDI optional, DDD required, punctuation and spaces flexible):
 
 ```
-^(\+?55 ?)? ?(\([1-9]{2}\)|[1-9]{2}) ?([2-5]\d{3}[- ]?\d{4})$
+^(\+?55 ?)? ?(\([1-9]{2}\)|[1-9]{2}) ?([2-5][0-9]{3}[- ]?[0-9]{4})$
 ```
 
 ### Creation
@@ -202,7 +203,7 @@ First digit of the local number must be 9 (total of 9 digits).
 Accepted patterns (DDI optional, DDD required, punctuation and spaces flexible):
 
 ```
-^(\+?55 ?)? ?(\([1-9]{2}\)|[1-9]{2}) ?(9\d{4}[- ]?\d{4})$
+^(\+?55 ?)? ?(\([1-9]{2}\)|[1-9]{2}) ?(9[0-9]{4}[- ]?[0-9]{4})$
 ```
 
 ### Creation
@@ -254,7 +255,7 @@ CardNumber card = "4929622041254286"; // implicit operator
 
 | Exception | Condition |
 |---|---|
-| `ArgumentNullException` | `null` passed to constructor or `IsValid` |
+| `ArgumentNullException` | `null` passed to constructor |
 | `ArgumentException` | invalid length or Luhn check fails |
 
 ### Properties
@@ -287,6 +288,11 @@ CardNumber.IsValid(null);              // false
 
 Converters for `System.Text.Json` are available in the `Person.Model.ValueObjects.Json` namespace
 for `LandLine`, `Mobile`, and `CardNumber`.
+
+> **v10 breaking change** — `LandLineConverter` and `MobileConverter` previously serialized a JSON
+> object (`{"Raw":"...","CountryCode":"...","AreaCode":"...","Number":"..."}`). They now serialize as
+> a plain JSON string (the canonical `Raw` value), consistent with `CardNumberConverter`. Existing
+> payloads produced with the old converters are **not** compatible with this version.
 
 ```csharp
 // via JsonSerializerOptions
