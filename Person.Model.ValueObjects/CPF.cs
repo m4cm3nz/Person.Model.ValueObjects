@@ -18,7 +18,7 @@ namespace Person.Model.ValueObjects
         private const int Modulus = 11;
 
         private static readonly Regex FormatMask =
-            new(@"^\d{11}$", RegexOptions.Compiled);
+            new(@"^[0-9]{11}$", RegexOptions.Compiled);
 
         private readonly string _raw;
 
@@ -73,8 +73,9 @@ namespace Person.Model.ValueObjects
         }
 
         /// <summary>Returns the CPF formatted with mask: <c>XXX.XXX.XXX-XX</c>.</summary>
-        public override string ToString() =>
-            $"{_raw[..3]}.{_raw[3..6]}.{_raw[6..9]}-{_raw[9..]}";
+        public override string ToString() => _raw is null
+            ? string.Empty
+            : $"{_raw[..3]}.{_raw[3..6]}.{_raw[6..9]}-{_raw[9..]}";
 
         /// <summary>
         /// Validates a string as a CPF without throwing.
@@ -92,7 +93,7 @@ namespace Person.Model.ValueObjects
             value.Replace(".", "").Replace("-", "").Trim();
 
         public bool Equals(CPF other) => _raw == other._raw;
-        public override bool Equals(object obj) => obj is CPF other && Equals(other);
+        public override bool Equals(object? obj) => obj is CPF other && Equals(other);
         public override int GetHashCode() => _raw?.GetHashCode() ?? 0;
         public static bool operator ==(CPF left, CPF right) => left.Equals(right);
         public static bool operator !=(CPF left, CPF right) => !left.Equals(right);

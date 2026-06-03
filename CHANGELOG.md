@@ -61,6 +61,10 @@ CNPJ.IsValid("AB123456000110");      // true
 
 - **CardNumber.IsValid**: `NullReferenceException` when receiving `null` replaced by `ArgumentNullException`.
 - **LandLine / Mobile**: inconsistent equality between instances of the same number in different input formats (see `Raw` breaking change above).
+- **All value objects**: `\d` in regex patterns replaced with `[0-9]` — `\d` in .NET matches any Unicode decimal digit (Arabic-Indic, Devanagari, etc.), not just ASCII digits. This prevented nonsense input from being correctly rejected.
+- **All value objects**: `default(T).ToString()` now returns `string.Empty` instead of throwing `NullReferenceException`. The default struct state (uninitialized) is a known C# limitation; the null guard makes it safe for use in collections and nullable contexts.
+- **CardNumber.IsValid**: now returns `false` for `null` input (consistent with `CNPJ.IsValid` and `CPF.IsValid`) instead of throwing `ArgumentNullException`.
+- **JSON converters (LandLine / Mobile)**: `PhoneNumberFactory.Write` previously serialized a JSON object (`{"Raw":"...","CountryCode":"...","AreaCode":"...","Number":"..."}`); deserialization read only the `"Raw"` field, making the serialization asymmetric and brittle. Both converters now serialize as a plain JSON string (the canonical `Raw` value), consistent with `CardNumberConverter`. **This is a breaking change for any existing serialized JSON payload using these converters.**
 
 ---
 

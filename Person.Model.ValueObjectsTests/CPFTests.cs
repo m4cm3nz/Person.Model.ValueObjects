@@ -171,6 +171,13 @@ namespace Person.Model.ValueObjects.Tests
         [Test]
         [TestCase("00000000000")]
         [TestCase("11111111111")]
+        [TestCase("22222222222")]
+        [TestCase("33333333333")]
+        [TestCase("44444444444")]
+        [TestCase("55555555555")]
+        [TestCase("66666666666")]
+        [TestCase("77777777777")]
+        [TestCase("88888888888")]
         [TestCase("99999999999")]
         public void HomogeneousSequenceShouldThrowInvalidCastTest(string value)
         {
@@ -184,7 +191,7 @@ namespace Person.Model.ValueObjects.Tests
         [Test]
         public void NullConstructorArgShouldThrowArgumentNullTest()
         {
-            Assert.Throws<ArgumentNullException>(() => new CPF(null));
+            Assert.Throws<ArgumentNullException>(() => new CPF(null!));
         }
 
         [Test]

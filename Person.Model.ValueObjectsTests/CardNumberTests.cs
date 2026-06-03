@@ -37,6 +37,38 @@ namespace Person.Model.ValueObjects.Tests
         }
 
         // ------------------------------------------------------------------ //
+        // Length boundaries                                                   //
+        // ------------------------------------------------------------------ //
+
+        [Test]
+        [TestCase("4532261615478")]        // 13 digits — Luhn valid
+        [TestCase("4532261615478000000")] // 19 digits — Luhn valid
+        public void CardNumberAtValidLengthBoundariesIsAcceptedTest(string number)
+        {
+            Assert.DoesNotThrow(() => { CardNumber _ = number; });
+        }
+
+        [Test]
+        [TestCase("123456789012")]         // 12 digits — too short
+        [TestCase("12345678901234567890")] // 20 digits — too long
+        public void CardNumberOutsideLengthBoundariesIsRejectedTest(string number)
+        {
+            Assert.Throws<ArgumentException>(() => { CardNumber _ = number; });
+        }
+
+        // ------------------------------------------------------------------ //
+        // Non-numeric characters                                              //
+        // ------------------------------------------------------------------ //
+
+        [Test]
+        [TestCase("4929-6220-4125-4286")]
+        [TestCase("4929 6220 4125 4286")]
+        public void CardNumberWithNonNumericCharactersIsRejectedTest(string number)
+        {
+            Assert.Throws<ArgumentException>(() => { CardNumber _ = number; });
+        }
+
+        // ------------------------------------------------------------------ //
         // Luhn validation                                                      //
         // ------------------------------------------------------------------ //
 
@@ -47,6 +79,57 @@ namespace Person.Model.ValueObjects.Tests
             CardNumber cardNumber;
 
             Assert.Throws<ArgumentException>(() => cardNumber = invalidCardNumber);
+        }
+
+        // ------------------------------------------------------------------ //
+        // IsValid                                                             //
+        // ------------------------------------------------------------------ //
+
+        [Test]
+        public void IsValidReturnsFalseForNullTest()
+        {
+            Assert.That(CardNumber.IsValid(null), Is.False);
+        }
+
+        [Test]
+        [TestCase("4929622041254286")]
+        public void IsValidReturnsTrueForValidNumberTest(string number)
+        {
+            Assert.That(CardNumber.IsValid(number), Is.True);
+        }
+
+        [Test]
+        [TestCase("49538528316877")]       // Luhn fail
+        [TestCase("123")]                  // too short
+        [TestCase("4929-6220-4125-4286")] // non-numeric
+        public void IsValidReturnsFalseForInvalidInputTest(string number)
+        {
+            Assert.That(CardNumber.IsValid(number), Is.False);
+        }
+
+        // ------------------------------------------------------------------ //
+        // Equality                                                            //
+        // ------------------------------------------------------------------ //
+
+        [Test]
+        public void EqualityBetweenTwoInstancesTest()
+        {
+            CardNumber a = new("4929622041254286");
+            CardNumber b = new("4929622041254286");
+
+            Assert.That(a, Is.EqualTo(b));
+            Assert.That(a == b, Is.True);
+            Assert.That(a != b, Is.False);
+            Assert.That(a.GetHashCode(), Is.EqualTo(b.GetHashCode()));
+        }
+
+        [Test]
+        public void InequalityBetweenDifferentCardNumbersTest()
+        {
+            CardNumber a = new("4929622041254286");
+            CardNumber b = new("5211801418318353");
+
+            Assert.That(a != b, Is.True);
         }
 
         // ------------------------------------------------------------------ //

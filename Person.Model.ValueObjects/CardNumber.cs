@@ -41,6 +41,7 @@ namespace Person.Model.ValueObjects
         /// </summary>
         public override string ToString()
         {
+            if (_number is null) return string.Empty;
             var sb = new StringBuilder(_number.Length + _number.Length / 4);
             for (int i = 0; i < _number.Length; i++)
             {
@@ -52,13 +53,12 @@ namespace Person.Model.ValueObjects
 
         /// <summary>
         /// Validates a string as a card number via the Luhn algorithm.
-        /// Returns <see langword="false"/> for strings with length outside the 13–19 range
-        /// or containing non-numeric characters.
+        /// Returns <see langword="false"/> for <see langword="null"/>, strings with length
+        /// outside the 13–19 range, or strings containing non-numeric characters.
         /// </summary>
-        /// <exception cref="ArgumentNullException">When <paramref name="cardNumber"/> is null.</exception>
         public static bool IsValid(string cardNumber)
         {
-            if (cardNumber is null) throw new ArgumentNullException(nameof(cardNumber));
+            if (cardNumber is null) return false;
             if (cardNumber.Length < 13 || cardNumber.Length > 19) return false;
 
             int sum = 0;
@@ -78,7 +78,7 @@ namespace Person.Model.ValueObjects
         }
 
         public bool Equals(CardNumber other) => _number == other._number;
-        public override bool Equals(object obj) => obj is CardNumber other && Equals(other);
+        public override bool Equals(object? obj) => obj is CardNumber other && Equals(other);
         public override int GetHashCode() => _number?.GetHashCode() ?? 0;
         public static bool operator ==(CardNumber left, CardNumber right) => left.Equals(right);
         public static bool operator !=(CardNumber left, CardNumber right) => !left.Equals(right);

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -10,6 +10,6 @@ namespace Person.Model.ValueObjects.Json
             PhoneNumberFactory.CreateMobile(ref reader);
 
         public override void Write(Utf8JsonWriter writer, Mobile value, JsonSerializerOptions options) =>
-            PhoneNumberFactory.Write(writer, value);
+            PhoneNumberFactory.WriteString(writer, value.Raw);
     }
 }

@@ -30,7 +30,7 @@ namespace Person.Model.ValueObjects
         private const int CnpjLength = CheckNumberLength + NumberLength;
 
         private static readonly Regex FormatMask =
-            new(@"^[A-Z0-9]{12}\d{2}$", RegexOptions.Compiled);
+            new(@"^[A-Z0-9]{12}[0-9]{2}$", RegexOptions.Compiled);
 
         private readonly string _raw;
 
@@ -89,8 +89,9 @@ namespace Person.Model.ValueObjects
         /// Returns the CNPJ formatted with mask: <c>XX.XXX.XXX/XXXX-XX</c>.
         /// Works for both numeric and alphanumeric formats.
         /// </summary>
-        public override string ToString() =>
-            $"{_raw[..2]}.{_raw[2..5]}.{_raw[5..8]}/{_raw[8..12]}-{_raw[12..]}";
+        public override string ToString() => _raw is null
+            ? string.Empty
+            : $"{_raw[..2]}.{_raw[2..5]}.{_raw[5..8]}/{_raw[8..12]}-{_raw[12..]}";
 
         /// <summary>
         /// Validates a string as a CNPJ without throwing.
@@ -112,7 +113,7 @@ namespace Person.Model.ValueObjects
             value.Replace(".", "").Replace("/", "").Replace("-", "").Trim();
 
         public bool Equals(CNPJ other) => _raw == other._raw;
-        public override bool Equals(object obj) => obj is CNPJ other && Equals(other);
+        public override bool Equals(object? obj) => obj is CNPJ other && Equals(other);
         public override int GetHashCode() => _raw?.GetHashCode() ?? 0;
         public static bool operator ==(CNPJ left, CNPJ right) => left.Equals(right);
         public static bool operator !=(CNPJ left, CNPJ right) => !left.Equals(right);

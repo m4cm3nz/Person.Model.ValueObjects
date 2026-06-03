@@ -14,17 +14,10 @@ namespace Person.Model.ValueObjects
     /// </summary>
     public readonly struct Mobile : IPhoneNumber, IEquatable<Mobile>
     {
-        private const string DefaultCountryCode = "55";
         private const string Pattern =
-            @"^(\+?55 ?)? ?(\([1-9]{2}\)|[1-9]{2}) ?(9\d{4}[- ]?\d{4})$";
+            @"^(\+?55 ?)? ?(\([1-9]{2}\)|[1-9]{2}) ?(9[0-9]{4}[- ]?[0-9]{4})$";
         private const string InvalidMessage =
             "O celular informado é inválido ou está em um formato incorreto.";
-
-        private static readonly Regex OnlyNumbers =
-            new(@"[0-9]+", RegexOptions.Compiled);
-
-        private static string ExtractDigits(string value) =>
-            string.Join(null, OnlyNumbers.Matches(value));
 
         /// <summary>Canonical form: <c>CountryCode + AreaCode + Number</c> (digits only).</summary>
         public string Raw { get; }
@@ -53,17 +46,18 @@ namespace Person.Model.ValueObjects
             if (!match.Success)
                 throw new ArgumentOutOfRangeException(nameof(phoneNumber), InvalidMessage);
 
-            var country = ExtractDigits(match.Groups[1].Value);
+            var country = PhoneNumberHelper.ExtractDigits(match.Groups[1].Value);
 
-            CountryCode = string.IsNullOrEmpty(country) ? DefaultCountryCode : country;
-            AreaCode = ExtractDigits(match.Groups[2].Value);
-            Number = ExtractDigits(match.Groups[3].Value);
+            CountryCode = string.IsNullOrEmpty(country) ? PhoneNumberHelper.DefaultCountryCode : country;
+            AreaCode = PhoneNumberHelper.ExtractDigits(match.Groups[2].Value);
+            Number = PhoneNumberHelper.ExtractDigits(match.Groups[3].Value);
             Raw = CountryCode + AreaCode + Number;
         }
 
         /// <summary>Returns the phone number formatted as: <c>+55 (51) 93635-1064</c>.</summary>
-        public override string ToString() =>
-            $"+{CountryCode} ({AreaCode}) {Number[..5]}-{Number[5..]}";
+        public override string ToString() => Raw is null
+            ? string.Empty
+            : $"+{CountryCode} ({AreaCode}) {Number[..5]}-{Number[5..]}";
 
         public static implicit operator string(Mobile phone) => phone.Raw;
 
@@ -80,7 +74,7 @@ namespace Person.Model.ValueObjects
         }
 
         public bool Equals(Mobile other) => Raw == other.Raw;
-        public override bool Equals(object obj) => obj is Mobile other && Equals(other);
+        public override bool Equals(object? obj) => obj is Mobile other && Equals(other);
         public override int GetHashCode() => Raw?.GetHashCode() ?? 0;
         public static bool operator ==(Mobile left, Mobile right) => left.Equals(right);
         public static bool operator !=(Mobile left, Mobile right) => !left.Equals(right);

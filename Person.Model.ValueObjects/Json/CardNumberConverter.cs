@@ -7,7 +7,7 @@ namespace Person.Model.ValueObjects.Json
     public class CardNumberConverter : JsonConverter<CardNumber>
     {
         public override CardNumber Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
-            new(reader.GetString());
+            new(reader.GetString()!);
 
         public override void Write(Utf8JsonWriter writer, CardNumber value, JsonSerializerOptions options) =>
             writer.WriteStringValue(value);

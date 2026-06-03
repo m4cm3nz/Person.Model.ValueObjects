@@ -86,6 +86,16 @@ namespace Person.Model.ValueObjects.Tests
         }
 
         [Test]
+        [TestCase("A0.000.000/0001-13", "A0000000000113")]
+        [TestCase("AB.123.456/0001-10", "AB123456000110")]
+        [TestCase("1A.2B3.C4D/5E6F-34", "1A2B3C4D5E6F34")]
+        public void MaskedAlphanumericInputIsAcceptedTest(string masked, string raw)
+        {
+            var cnpj = new CNPJ(masked);
+            Assert.That((string)cnpj, Is.EqualTo(raw));
+        }
+
+        [Test]
         [TestCase("07.223.860/0001-33", "07223860000133")]
         [TestCase("65.647.062/0001-35", "65647062000135")]
         public void StripMaskRemovesFormattingCharactersTest(string masked, string expected)

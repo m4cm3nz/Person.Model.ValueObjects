@@ -273,6 +273,7 @@ Console.WriteLine(card.ToString()); // 4929 6220 4125 4286
 CardNumber.IsValid("4929622041254286"); // true
 CardNumber.IsValid("49538528316877");   // false (Luhn fail)
 CardNumber.IsValid("123");             // false (too short)
+CardNumber.IsValid(null);              // false
 ```
 
 ---
