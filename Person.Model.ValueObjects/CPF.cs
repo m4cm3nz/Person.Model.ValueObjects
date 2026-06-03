@@ -1,125 +1,154 @@
-﻿using System;
-using System.Linq;
+using System;
 
 namespace Person.Model.ValueObjects
 {
-    [Serializable]
-    public struct CPF
+    /// <summary>
+    /// Immutable value object representing a valid CPF
+    /// (<i>Cadastro de Pessoa Física</i> — Brazilian Social Security Number).
+    /// Format: 9-digit root + 2 check digits (11 numeric digits total).
+    /// Accepts input with or without the formatting mask (<c>123.456.789-09</c>).
+    /// </summary>
+    public readonly struct CPF : IEquatable<CPF>
     {
-        private static readonly int CheckNumberLength = 2;
-        private static readonly int NumberLength = 9;
-        private static readonly int CPFLength = CheckNumberLength + NumberLength;
+        private const int CheckNumberLength = 2;
+        private const int NumberLength = 9;
+        private const int CpfLength = CheckNumberLength + NumberLength;
+        private const int Modulus = 11;
+        private const int MaxInputLength = 20;
 
-        private readonly string Raw => Number + CheckNumber;
-        public string Number { get; set; }
-        public string CheckNumber { get; set; }
+        private readonly string _raw;
 
-        public static implicit operator string(CPF number) => number.Raw;
+        /// <summary>The first 9 digits: taxpayer root.</summary>
+        public string Number { get; }
 
-        public static implicit operator CPF(string number)
+        /// <summary>The 2 check digits.</summary>
+        public string CheckNumber { get; }
+
+        public static implicit operator string(CPF cpf) => cpf._raw;
+
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when <see langword="null"/> is assigned via implicit conversion.
+        /// Use <see cref="Nullable{CPF}"/> to represent the absence of a value.
+        /// </exception>
+        public static implicit operator CPF(string value) => value is null
+            ? throw new InvalidOperationException("Para valores nulos utilize CPF?.")
+            : new(value);
+
+        public static implicit operator CPF?(string value)
         {
-            number = number ??
-                throw new InvalidOperationException(
-                    $"Para valores nulos utilize Nullable<{typeof(CPF).Name}>");
-
-            return new CPF(number);
+            if (value == null) return null;
+            return new CPF(value);
         }
 
-        public CPF(string number)
+        /// <summary>
+        /// Constructs a CPF from a string with or without the formatting mask.
+        /// Dots and hyphens are stripped automatically.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">When <paramref name="value"/> is null.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// When the format is invalid (non-numeric or wrong length) or when the input
+        /// exceeds <c>MaxInputLength</c> (20) characters.
+        /// </exception>
+        /// <exception cref="InvalidCastException">When the check digits do not match.</exception>
+        public CPF(string value)
         {
-            GuardArgument(number);
+            if (value is null)
+                throw new ArgumentNullException(nameof(value),
+                    "Não é possível criar um CPF a partir de um valor nulo.");
 
-            if (!Internal.IsValid(number))
+            if (value.Length > MaxInputLength)
+                throw new ArgumentOutOfRangeException(nameof(value),
+                    $"Comprimento máximo permitido é {MaxInputLength} caracteres.");
+
+            value = StripMask(value);
+
+            if (!Patterns.CpfFormat().IsMatch(value))
+                throw new ArgumentOutOfRangeException(nameof(value),
+                    $"Formato inválido. Esperado: string numérica de {CpfLength} dígitos.");
+
+            if (!Internal.IsValid(value))
                 throw new InvalidCastException(
                     "A cadeia de caracteres informada não corresponde a um CPF válido.");
 
-            Number = Internal.GetNumberFrom(number);
-            CheckNumber = Internal.GetCheckNumberFrom(number);
+            Number = value[..NumberLength];
+            CheckNumber = value[NumberLength..];
+            _raw = value;
         }
 
-        public override readonly string ToString()
+        /// <summary>Returns the CPF formatted with mask: <c>XXX.XXX.XXX-XX</c>.</summary>
+        public override string ToString() => _raw is null
+            ? string.Empty
+            : $"{_raw[..3]}.{_raw[3..6]}.{_raw[6..9]}-{_raw[9..]}";
+
+        /// <summary>
+        /// Validates a string as a CPF without throwing.
+        /// Strips the mask automatically before validating.
+        /// Returns <see langword="false"/> for strings exceeding <c>MaxInputLength</c> (20) characters.
+        /// </summary>
+        public static bool IsValid(string value)
         {
-            return Convert.ToUInt64(Raw).ToString(@"000\.000\.000\-00");
+            if (value is null) return false;
+            if (value.Length > MaxInputLength) return false;
+            value = StripMask(value);
+            return Patterns.CpfFormat().IsMatch(value) && Internal.IsValid(value);
         }
 
-        private static void GuardArgument(string number)
+        /// <summary>
+        /// Removes mask characters (<c>.</c> and <c>-</c>) from the string in a single pass
+        /// using a <c>stackalloc</c> char filter.
+        /// </summary>
+        public static string StripMask(string value)
         {
-            if (number == null)
-                throw new ArgumentNullException(nameof(number),
-                    "Não é possível criar um CPF a partir de um valor nulo.");
-
-            if (IsOutOfRange(number))
-                throw new ArgumentOutOfRangeException(
-                    nameof(number), $"Era esperado uma string numérica de {CPFLength} dígitos");
+            Span<char> buf = stackalloc char[value.Length];
+            int n = 0;
+            foreach (char c in value)
+                if (c != '.' && c != '-')
+                    buf[n++] = c;
+            var trimmed = buf[..n].Trim();
+            if (trimmed.Length == value.Length) return value;
+            return new string(trimmed);
         }
 
-        public static bool IsOutOfRange(string number) =>
-            !(IsElevenLength(number) && IsNumeric(number));
+        public bool Equals(CPF other) => _raw == other._raw;
+        public override bool Equals(object? obj) => obj is CPF other && Equals(other);
+        public override int GetHashCode() => _raw?.GetHashCode() ?? 0;
+        public static bool operator ==(CPF left, CPF right) => left.Equals(right);
+        public static bool operator !=(CPF left, CPF right) => !left.Equals(right);
 
-        public static bool IsNumeric(string value) =>
-            value.All(char.IsNumber);
-
-        public static bool IsElevenLength(string value) =>
-            value.Length == CPFLength;
-
-        public static string GetCheckNumberFrom(string number)
+        private static class Internal
         {
-            GuardArgument(number);
-            return Internal.GetCheckNumberFrom(number);
-        }
-
-        public static string GetNumberFrom(string number)
-        {
-            GuardArgument(number);
-            return Internal.GetNumberFrom(number);
-        }
-        public static bool IsValid(string number)
-        {
-            return !IsOutOfRange(number) && Internal.IsValid(number);
-        }
-
-        private class Internal
-        {
-            public static string GetCheckNumberFrom(string number)
+            private static bool AllSame(string s)
             {
-                return number?.Substring(NumberLength, CheckNumberLength);
+                char first = s[0];
+                for (int i = 1; i < s.Length; i++)
+                    if (s[i] != first) return false;
+                return true;
             }
 
-            public static string GetNumberFrom(string number)
+            public static bool IsValid(string cpf)
             {
-                return number?[..NumberLength];
+                if (AllSame(cpf)) return false;
+
+                Span<int> values = stackalloc int[NumberLength + 1];
+                for (int i = 0; i < NumberLength; i++)
+                    values[i] = cpf[i] - '0';
+
+                int digit1 = CheckDigit(values[..NumberLength]);
+                values[NumberLength] = digit1;
+                int digit2 = CheckDigit(values);
+
+                return (cpf[9] - '0') == digit1
+                    && (cpf[10] - '0') == digit2;
             }
 
-            public static bool IsValid(string number)
+            private static int CheckDigit(ReadOnlySpan<int> values)
             {
-                var numberArray = GetNumberFrom(number)
-                    .ToCharArray()
-                    .Select(x => int.Parse(x.ToString()))
-                    .ToArray();
-
-                var firstDigit = GetCheckDigitFrom(numberArray);
-
-                numberArray = [.. numberArray, firstDigit];
-
-                var secondDigit = GetCheckDigitFrom(numberArray);
-
-                return number == string.Join("", numberArray.Append(secondDigit));
-            }
-
-            private static int GetCheckDigitFrom(int[] numberArray)
-            {
-                var summation = 0;
-                int maxLoops = numberArray.Length;
-                int weight = maxLoops + 1;
-
-                for (var index = 0; index < maxLoops; index++)
-                    summation += (numberArray[index] * weight--);
-
-                var remainder = (summation % CPFLength);
-
-                return remainder < CheckNumberLength ?
-                    default :
-                    CPFLength - remainder;
+                int weight = values.Length + 1;
+                int sum = 0;
+                for (int i = 0; i < values.Length; i++)
+                    sum += values[i] * weight--;
+                int remainder = sum % Modulus;
+                return remainder < CheckNumberLength ? 0 : Modulus - remainder;
             }
         }
     }

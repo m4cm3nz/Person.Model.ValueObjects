@@ -1,133 +1,176 @@
-﻿using System;
-using System.Linq;
+using System;
 
 namespace Person.Model.ValueObjects
-{        
+{
     /// <summary>
-    /// Employer Number 
+    /// Immutable value object representing a valid CNPJ
+    /// (<i>Cadastro Nacional de Pessoa Jurídica</i> — Brazilian Employer Identification Number).
+    /// Supports both the legacy numeric format and the new alphanumeric format
+    /// introduced by IN RFB nº 2.229/2024, effective July 2026.
+    /// <para>
+    /// Format: <c>[A-Z0-9]{12}[0-9]{2}</c> — the last two characters (check digits)
+    /// are always numeric. Lowercase letters are rejected; the caller is responsible
+    /// for casing before constructing the value.
+    /// </para>
+    /// <para>
+    /// <b>v2 breaking changes:</b>
+    /// <list type="bullet">
+    ///   <item><description><c>ToString()</c> uses alphanumeric mask for all formats (<c>AB.123.456/0001-00</c>).</description></item>
+    ///   <item><description>Lowercase letters throw <c>ArgumentOutOfRangeException</c> instead of being silently uppercased.</description></item>
+    /// </list>
+    /// </para>
+    /// <see href="https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/perguntas-e-respostas/cnpj/cnpj-alfanumerico.pdf"/>
     /// </summary>
-    [Serializable]
-    public struct CNPJ
+    public readonly struct CNPJ : IEquatable<CNPJ>
     {
-        private static readonly int CheckNumberLength = 2;
-        private static readonly int NumberLength = 12;
-        private static readonly int CnpjLength = CheckNumberLength + NumberLength;
+        private const int CheckNumberLength = 2;
+        private const int NumberLength = 12;
+        private const int CnpjLength = CheckNumberLength + NumberLength;
+        private const int MaxInputLength = 25;
 
-        private readonly string Raw => Number + CheckNumber;
-        public string Number { get; private set; }
-        public string CheckNumber { get; private set; }
+        private readonly string _raw;
 
-        public static implicit operator string(CNPJ number) => number.Raw;
+        /// <summary>The first 12 characters: company root and establishment order.</summary>
+        public string Number { get; }
 
-        public static implicit operator CNPJ(string number)
+        /// <summary>The 2 check digits.</summary>
+        public string CheckNumber { get; }
+
+        public static implicit operator string(CNPJ cnpj) => cnpj._raw;
+
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when <see langword="null"/> is assigned via implicit conversion.
+        /// Use <see cref="Nullable{CNPJ}"/> to represent the absence of a value.
+        /// </exception>
+        public static implicit operator CNPJ(string value) => value is null
+            ? throw new InvalidOperationException("Para valores nulos utilize CNPJ?.")
+            : new(value);
+
+        public static implicit operator CNPJ?(string value)
         {
-            number = number ??
-                throw new InvalidOperationException(
-                    $"Para valores nulos utilize Nullable<{typeof(CNPJ).Name}>");
-
-            return new CNPJ(number);
+            if (value is null) return null;
+            return new CNPJ(value);
         }
 
-        public CNPJ(string number)
+        /// <summary>
+        /// Constructs a CNPJ from a string with or without formatting mask.
+        /// Dots, slash and hyphen are stripped automatically; letters must be
+        /// uppercase — lowercase results in <see cref="ArgumentOutOfRangeException"/>.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">When <paramref name="value"/> is null.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// When the format is invalid or when the input exceeds <c>MaxInputLength</c> (25) characters.
+        /// </exception>
+        /// <exception cref="InvalidCastException">When the check digits do not match.</exception>
+        public CNPJ(string value)
         {
-            GuardArgument(number);
+            if (value is null)
+                throw new ArgumentNullException(nameof(value),
+                    "Não é possível criar um CNPJ a partir de um valor nulo.");
 
-            if (!Internal.IsValid(number))
+            if (value.Length > MaxInputLength)
+                throw new ArgumentOutOfRangeException(nameof(value),
+                    $"Comprimento máximo permitido é {MaxInputLength} caracteres.");
+
+            value = StripMask(value);
+
+            if (!Patterns.CnpjFormat().IsMatch(value))
+                throw new ArgumentOutOfRangeException(nameof(value),
+                    $"Formato inválido. Esperado: [A-Z0-9]{{12}}[0-9]{{2}} ({CnpjLength} caracteres, maiúsculas).");
+
+            if (!Internal.IsValid(value))
                 throw new InvalidCastException(
                     "A cadeia de caracteres informada não corresponde a um CNPJ válido.");
 
-            Number = Internal.GetNumberFrom(number);
-            CheckNumber = Internal.GetCheckNumberFrom(number);
+            Number = value[..NumberLength];
+            CheckNumber = value[NumberLength..];
+            _raw = value;
         }
 
-        public override readonly string ToString()
+        /// <summary>
+        /// Returns the CNPJ formatted with mask: <c>XX.XXX.XXX/XXXX-XX</c>.
+        /// Works for both numeric and alphanumeric formats.
+        /// </summary>
+        public override string ToString() => _raw is null
+            ? string.Empty
+            : $"{_raw[..2]}.{_raw[2..5]}.{_raw[5..8]}/{_raw[8..12]}-{_raw[12..]}";
+
+        /// <summary>
+        /// Validates a string as a CNPJ without throwing.
+        /// Strips the mask automatically; rejects lowercase letters.
+        /// Returns <see langword="false"/> for strings exceeding <c>MaxInputLength</c> (25) characters.
+        /// </summary>
+        public static bool IsValid(string value)
         {
-            return Convert.ToUInt64(Raw).ToString(@"00\.000\.000\/0000\-00");
+            if (value is null) return false;
+            if (value.Length > MaxInputLength) return false;
+            value = StripMask(value);
+            return Patterns.CnpjFormat().IsMatch(value) && Internal.IsValid(value);
         }
 
-        private static void GuardArgument(string cnpj)
+        /// <summary>
+        /// Removes mask characters (<c>.</c>, <c>/</c>, <c>-</c>) from the string in a single pass
+        /// using a <c>stackalloc</c> char filter (no heap allocation when no mask characters
+        /// are present and the result already matches the input).
+        /// </summary>
+        public static string StripMask(string value)
         {
-            if (cnpj == null)
-                throw new ArgumentNullException(nameof(cnpj),
-                    "Não é possível criar um CNPJ a partir de um valor nulo.");
-
-            if (IsOutOfRange(cnpj))
-                throw new ArgumentOutOfRangeException(
-                    nameof(cnpj), $"Era esperado uma string numérica de {CnpjLength} dígitos");
+            Span<char> buf = stackalloc char[value.Length];
+            int n = 0;
+            foreach (char c in value)
+                if (c != '.' && c != '/' && c != '-')
+                    buf[n++] = c;
+            var trimmed = buf[..n].Trim();
+            if (trimmed.Length == value.Length) return value;
+            return new string(trimmed);
         }
 
-        public static bool IsOutOfRange(string number) =>
-            !(IsFourteenLength(number) && IsNumeric(number));
+        public bool Equals(CNPJ other) => _raw == other._raw;
+        public override bool Equals(object? obj) => obj is CNPJ other && Equals(other);
+        public override int GetHashCode() => _raw?.GetHashCode() ?? 0;
+        public static bool operator ==(CNPJ left, CNPJ right) => left.Equals(right);
+        public static bool operator !=(CNPJ left, CNPJ right) => !left.Equals(right);
 
-        public static bool IsNumeric(string value) =>
-            value.All(char.IsNumber);
-
-        public static bool IsFourteenLength(string number) =>
-            number.Length == CnpjLength;
-
-        public static string GetCheckNumberFrom(string number)
+        private static class Internal
         {
-            GuardArgument(number);
-            return Internal.GetCheckNumberFrom(number);
-        }
-
-        public static string GetNumberFrom(string number)
-        {
-            GuardArgument(number);
-            return Internal.GetNumberFrom(number);
-        }
-
-        public static bool IsValid(string number)
-        {
-            return !IsOutOfRange(number) && Internal.IsValid(number);
-        }
-
-        private class Internal
-        {
-            public static string GetCheckNumberFrom(string number)
+            private static bool AllSame(string s)
             {
-                return number?.Substring(NumberLength, CheckNumberLength);
+                char first = s[0];
+                for (int i = 1; i < s.Length; i++)
+                    if (s[i] != first) return false;
+                return true;
             }
 
-            public static string GetNumberFrom(string number)
+            // ASCII-48: '0'→0 .. '9'→9 | 'A'→17 .. 'Z'→42
+            private static int CharValue(char c) => c - 48;
+
+            public static bool IsValid(string cnpj)
             {
-                return number?[..NumberLength];
+                if (AllSame(cnpj)) return false;
+
+                Span<int> values = stackalloc int[NumberLength + 1];
+                for (int i = 0; i < NumberLength; i++)
+                    values[i] = CharValue(cnpj[i]);
+
+                int digit1 = CheckDigit(values[..NumberLength]);
+                values[NumberLength] = digit1;
+                int digit2 = CheckDigit(values);
+
+                return (cnpj[12] - '0') == digit1
+                    && (cnpj[13] - '0') == digit2;
             }
 
-            public static bool IsValid(string number)
+            private static int CheckDigit(ReadOnlySpan<int> values)
             {
-                var numberArray = GetNumberFrom(number)
-                    .ToCharArray()
-                    .Select(x => int.Parse(x.ToString()))
-                    .ToArray();
-
-                var firstDigit = CheckDigit(numberArray);
-
-                numberArray = [.. numberArray, firstDigit];
-
-                var secondDigit = CheckDigit(numberArray);
-
-                return number == string.Join("", numberArray.Append(secondDigit));
-            }
-
-            private static int CheckDigit(int[] numberArray)
-            {
-                var summation = 0;
-                int maxLoops = numberArray.Length;
-                int weight = maxLoops - 7;
-                int module = 11;
-
-                for (var index = 0; index < maxLoops; index++)
+                int sum = 0;
+                int weight = values.Length - 7;
+                for (int i = 0; i < values.Length; i++)
                 {
-                    summation += (numberArray[index] * weight--);
+                    sum += values[i] * weight--;
                     if (weight == 1) weight = 9;
                 }
-
-                var remainder = (summation % module);
-
-                return remainder < CheckNumberLength ?
-                    default :
-                    module - remainder;
+                int remainder = sum % 11;
+                return remainder < 2 ? 0 : 11 - remainder;
             }
         }
     }

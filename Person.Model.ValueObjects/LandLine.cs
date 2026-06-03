@@ -1,67 +1,84 @@
-﻿using System;
+using System;
 using System.Text.RegularExpressions;
 
 namespace Person.Model.ValueObjects
 {
     /// <summary>
-    /// Representa um número de telefone fixo 
-    /// respeitando a codificação brasileira definida pela ANATEL, 
-    /// nos formatos atendidos pela expressão regular:
-    /// ^(\+?55 ?)? ?(\([1-9]{2}\)|[1-9]{2}) ?([2-5]\d{3}[-| ]?\d{4})$
+    /// Immutable value object representing a valid Brazilian landline phone number.
+    /// Accepts DDI +55 (optional), a two-digit area code (DDD), and a local number
+    /// following the ANATEL standard for landlines (first digit between 2 and 5).
+    /// <para>
+    /// <see cref="Raw"/> always returns the canonical form <c>CountryCode + AreaCode + Number</c>,
+    /// regardless of the input format.
+    /// </para>
     /// </summary>
-    [Serializable]
-    public partial struct LandLine : IPhoneNumber
+    public readonly struct LandLine : IPhoneNumber, IEquatable<LandLine>
     {
-        private static readonly string DefaultCountryCode = "55";
-
-        private static readonly string Pattern =
-            @"^(\+?55 ?)? ?(\([1-9]{2}\)|[1-9]{2}) ?([2-5]\d{3}[-| ]?\d{4})$";
-
-        private static readonly string Message =
+        private const int MaxInputLength = 30;
+        private const string InvalidMessage =
             "O telefone informado é inválido ou está em um formato incorreto.";
 
-        [GeneratedRegex(@"[0-9]+")]
-        private static partial Regex OnlyNumbersRegex();
+        /// <summary>Canonical form: <c>CountryCode + AreaCode + Number</c> (digits only).</summary>
+        public string Raw { get; }
 
-        public static string GetOnlyNumbersFrom(string value) =>
-           string.Join(null, OnlyNumbersRegex().Matches(value));
+        /// <summary>Country calling code (DDI). Defaults to <c>"55"</c> when not supplied in the input.</summary>
+        public string CountryCode { get; }
 
-        public string Raw { get; private set; }
-        public string CountryCode { get; private set; }
-        public string AreaCode { get; private set; }
-        public string Number { get; private set; }
+        /// <summary>Two-digit area code (DDD).</summary>
+        public string AreaCode { get; }
 
-        public override readonly string ToString()
-        {
-            return $"+{CountryCode} ({AreaCode} {Number[..4]} {Number.Substring(4, 4)})";
-        }
+        /// <summary>Eight-digit local number.</summary>
+        public string Number { get; }
 
+        /// <summary>
+        /// Constructs a LandLine from a string in any accepted format.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">When <paramref name="phoneNumber"/> is null or empty.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">When the format does not match the ANATEL pattern.</exception>
         public LandLine(string phoneNumber)
         {
             if (string.IsNullOrEmpty(phoneNumber))
                 throw new ArgumentNullException(nameof(phoneNumber));
 
-            var match = Regex.Match(phoneNumber, Pattern);
+            if (phoneNumber.Length > MaxInputLength)
+                throw new ArgumentOutOfRangeException(nameof(phoneNumber), InvalidMessage);
+
+            var match = Patterns.LandLinePattern().Match(phoneNumber);
 
             if (!match.Success)
-                throw new ArgumentOutOfRangeException(nameof(phoneNumber), Message);
+                throw new ArgumentOutOfRangeException(nameof(phoneNumber), InvalidMessage);
 
-            CountryCode = GetOnlyNumbersFrom(match.Groups[1].Value);
-            CountryCode = string.IsNullOrEmpty(CountryCode) ? DefaultCountryCode : CountryCode;
-            AreaCode = GetOnlyNumbersFrom(match.Groups[2].Value);
-            Number = GetOnlyNumbersFrom(match.Groups[3].Value);
-            Raw = phoneNumber;
+            var country = PhoneNumberHelper.ExtractDigits(match.Groups[1].Value);
+
+            CountryCode = string.IsNullOrEmpty(country) ? PhoneNumberHelper.DefaultCountryCode : country;
+            AreaCode = PhoneNumberHelper.ExtractDigits(match.Groups[2].Value);
+            Number = PhoneNumberHelper.ExtractDigits(match.Groups[3].Value);
+            Raw = CountryCode + AreaCode + Number;
         }
 
-        public static implicit operator string(LandLine phoneNumber) => phoneNumber.Raw;
-        public static implicit operator LandLine(string phoneNumber)
+        /// <summary>Returns the phone number formatted as: <c>+55 (51) 3635-2520</c>.</summary>
+        public override string ToString() => Raw is null
+            ? string.Empty
+            : $"+{CountryCode} ({AreaCode}) {Number[..4]}-{Number[4..]}";
+
+        public static implicit operator string(LandLine phone) => phone.Raw;
+
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when <see langword="null"/> is assigned via implicit conversion.
+        /// Use <see cref="Nullable{LandLine}"/> to represent the absence of a value.
+        /// </exception>
+        public static implicit operator LandLine(string phone)
         {
-            phoneNumber = phoneNumber ??
-                throw new InvalidOperationException(
-                    $"Para valores nulos utilize Nullable<{typeof(LandLine).Name}>");
+            _ = phone ?? throw new InvalidOperationException(
+                $"Para valores nulos utilize Nullable<{typeof(LandLine).Name}>.");
 
-            return new LandLine(phoneNumber);
+            return new LandLine(phone);
         }
 
+        public bool Equals(LandLine other) => Raw == other.Raw;
+        public override bool Equals(object? obj) => obj is LandLine other && Equals(other);
+        public override int GetHashCode() => Raw?.GetHashCode() ?? 0;
+        public static bool operator ==(LandLine left, LandLine right) => left.Equals(right);
+        public static bool operator !=(LandLine left, LandLine right) => !left.Equals(right);
     }
 }
