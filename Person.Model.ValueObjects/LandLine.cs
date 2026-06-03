@@ -14,8 +14,7 @@ namespace Person.Model.ValueObjects
     /// </summary>
     public readonly struct LandLine : IPhoneNumber, IEquatable<LandLine>
     {
-        private const string Pattern =
-            @"^(\+?55 ?)? ?(\([1-9]{2}\)|[1-9]{2}) ?([2-5][0-9]{3}[- ]?[0-9]{4})$";
+        private const int MaxInputLength = 30;
         private const string InvalidMessage =
             "O telefone informado é inválido ou está em um formato incorreto.";
 
@@ -41,7 +40,10 @@ namespace Person.Model.ValueObjects
             if (string.IsNullOrEmpty(phoneNumber))
                 throw new ArgumentNullException(nameof(phoneNumber));
 
-            var match = Regex.Match(phoneNumber, Pattern);
+            if (phoneNumber.Length > MaxInputLength)
+                throw new ArgumentOutOfRangeException(nameof(phoneNumber), InvalidMessage);
+
+            var match = Patterns.LandLinePattern().Match(phoneNumber);
 
             if (!match.Success)
                 throw new ArgumentOutOfRangeException(nameof(phoneNumber), InvalidMessage);

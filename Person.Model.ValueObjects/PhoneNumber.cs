@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+using System;
 
 namespace Person.Model.ValueObjects
 {
@@ -13,8 +13,16 @@ namespace Person.Model.ValueObjects
     internal static class PhoneNumberHelper
     {
         internal const string DefaultCountryCode = "55";
-        private static readonly Regex OnlyNumbers = new(@"[0-9]+", RegexOptions.Compiled);
-        internal static string ExtractDigits(string value) =>
-            string.Join(null, OnlyNumbers.Matches(value));
+
+        internal static string ExtractDigits(string value)
+        {
+            if (value.Length == 0) return value;
+            Span<char> buf = stackalloc char[value.Length];
+            int n = 0;
+            foreach (char c in value)
+                if (c >= '0' && c <= '9') buf[n++] = c;
+            if (n == value.Length) return value;
+            return new string(buf[..n]);
+        }
     }
 }

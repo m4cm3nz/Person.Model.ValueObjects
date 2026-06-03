@@ -259,12 +259,17 @@ CardNumber card = "4929622041254286"; // implicit operator
 
 ### Properties
 
+`ToString()` returns the card number with all but the last 4 digits masked, making it
+safe to emit in logs and structured output. Use `ToFormatted()` to obtain the full
+formatted number when the unmasked value is required.
+
 ```csharp
 CardNumber card = "4929622041254286";
 
-Console.WriteLine((string)card);    // 4929622041254286
-Console.WriteLine(card.Number);     // 4929622041254286
-Console.WriteLine(card.ToString()); // 4929 6220 4125 4286
+Console.WriteLine((string)card);       // 4929622041254286
+Console.WriteLine(card.Number);        // 4929622041254286
+Console.WriteLine(card.ToString());    // **** **** **** 4286  (masked — safe for logs)
+Console.WriteLine(card.ToFormatted()); // 4929 6220 4125 4286
 ```
 
 ### Static helpers

@@ -72,3 +72,17 @@ CNPJ.IsValid("AB123456000110");      // true
 
 - XML docs added to `CPF`, `LandLine`, `Mobile`, and `CardNumber`; translated to English across all value objects.
 - README updated: `CardNumber` and `JSON converters` sections added; corrected examples and references to removed methods; updated regex patterns.
+
+### Performance improvements
+
+- **All validation algorithms**: `Enumerable.Distinct().Count() == 1` replaced with a zero-allocation char loop; `int[]` heap allocations in CNPJ/CPF check-digit routines replaced with `stackalloc Span<int>` — eliminates 3–5 heap allocations per `IsValid` call.
+- **CPF check-digit**: LINQ closure (`values.Sum(v => v * weight--)`) replaced with an explicit loop, eliminating delegate allocation per call.
+- **StripMask (CNPJ/CPF)**: four chained `string.Replace` calls replaced with a single-pass `stackalloc` char filter — reduces peak allocations from 4 to 1 per call.
+- **Phone number construction (LandLine/Mobile)**: `ExtractDigits` rewritten using `stackalloc` char filter instead of `MatchCollection` + `string.Join` — reduces allocations from ~12 to 1 per digit extraction.
+- **Source-generated regexes**: all five compiled regexes migrated to `[GeneratedRegex]`, eliminating runtime IL emission (`DynamicMethod`) and making the library AOT-compatible. Phone patterns use `RegexOptions.NonBacktracking` for provably O(n) matching.
+
+### Security improvements
+
+- **DoS via large payloads**: constructors and `IsValid` methods now reject inputs exceeding a safe maximum length before performing any string manipulation. Prevents multi-megabyte payloads from triggering multi-allocation `StripMask` chains.
+- **CardNumber.ToString() masked by default**: `ToString()` now returns a masked representation (e.g. `**** **** **** 4286`) to prevent accidental PAN exposure in logs and structured output. Use `ToFormatted()` for the full formatted number.
+- **JSON converters**: `CardNumberConverter` and `MobileConverter` now handle `JsonTokenType.Null` explicitly instead of passing `null!` to constructors.

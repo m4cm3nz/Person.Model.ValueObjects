@@ -137,12 +137,21 @@ namespace Person.Model.ValueObjects.Tests
         // ------------------------------------------------------------------ //
 
         [Test]
-        [TestCase("4929622041254286", "4929 6220 4125 4286")]
+        [TestCase("4929622041254286", "**** **** **** 4286")]
         public void ToStringFormatsCorrectlyTest(string number, string expected)
         {
             CardNumber cardNumber = number;
 
             Assert.That(cardNumber.ToString(), Is.EqualTo(expected));
+        }
+
+        [Test]
+        [TestCase("4929622041254286", "4929 6220 4125 4286")]
+        public void ToFormattedReturnsFullNumberTest(string number, string expected)
+        {
+            CardNumber cardNumber = number;
+
+            Assert.That(cardNumber.ToFormatted(), Is.EqualTo(expected));
         }
 
         // ------------------------------------------------------------------ //

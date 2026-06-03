@@ -1,6 +1,4 @@
 using System;
-using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace Person.Model.ValueObjects
 {
@@ -16,9 +14,7 @@ namespace Person.Model.ValueObjects
         private const int NumberLength = 9;
         private const int CpfLength = CheckNumberLength + NumberLength;
         private const int Modulus = 11;
-
-        private static readonly Regex FormatMask =
-            new(@"^[0-9]{11}$", RegexOptions.Compiled);
+        private const int MaxInputLength = 20;
 
         private readonly string _raw;
 
@@ -49,7 +45,10 @@ namespace Person.Model.ValueObjects
         /// Dots and hyphens are stripped automatically.
         /// </summary>
         /// <exception cref="ArgumentNullException">When <paramref name="value"/> is null.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">When the format is invalid (non-numeric or wrong length).</exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// When the format is invalid (non-numeric or wrong length) or when the input
+        /// exceeds <c>MaxInputLength</c> (20) characters.
+        /// </exception>
         /// <exception cref="InvalidCastException">When the check digits do not match.</exception>
         public CPF(string value)
         {
@@ -57,9 +56,13 @@ namespace Person.Model.ValueObjects
                 throw new ArgumentNullException(nameof(value),
                     "Não é possível criar um CPF a partir de um valor nulo.");
 
+            if (value.Length > MaxInputLength)
+                throw new ArgumentOutOfRangeException(nameof(value),
+                    $"Comprimento máximo permitido é {MaxInputLength} caracteres.");
+
             value = StripMask(value);
 
-            if (!FormatMask.IsMatch(value))
+            if (!Patterns.CpfFormat().IsMatch(value))
                 throw new ArgumentOutOfRangeException(nameof(value),
                     $"Formato inválido. Esperado: string numérica de {CpfLength} dígitos.");
 
@@ -80,17 +83,31 @@ namespace Person.Model.ValueObjects
         /// <summary>
         /// Validates a string as a CPF without throwing.
         /// Strips the mask automatically before validating.
+        /// Returns <see langword="false"/> for strings exceeding <c>MaxInputLength</c> (20) characters.
         /// </summary>
         public static bool IsValid(string value)
         {
             if (value is null) return false;
+            if (value.Length > MaxInputLength) return false;
             value = StripMask(value);
-            return FormatMask.IsMatch(value) && Internal.IsValid(value);
+            return Patterns.CpfFormat().IsMatch(value) && Internal.IsValid(value);
         }
 
-        /// <summary>Removes mask characters (<c>.</c> and <c>-</c>) from the string.</summary>
-        public static string StripMask(string value) =>
-            value.Replace(".", "").Replace("-", "").Trim();
+        /// <summary>
+        /// Removes mask characters (<c>.</c> and <c>-</c>) from the string in a single pass
+        /// using a <c>stackalloc</c> char filter.
+        /// </summary>
+        public static string StripMask(string value)
+        {
+            Span<char> buf = stackalloc char[value.Length];
+            int n = 0;
+            foreach (char c in value)
+                if (c != '.' && c != '-')
+                    buf[n++] = c;
+            var trimmed = buf[..n].Trim();
+            if (trimmed.Length == value.Length) return value;
+            return new string(trimmed);
+        }
 
         public bool Equals(CPF other) => _raw == other._raw;
         public override bool Equals(object? obj) => obj is CPF other && Equals(other);
@@ -100,24 +117,36 @@ namespace Person.Model.ValueObjects
 
         private static class Internal
         {
+            private static bool AllSame(string s)
+            {
+                char first = s[0];
+                for (int i = 1; i < s.Length; i++)
+                    if (s[i] != first) return false;
+                return true;
+            }
+
             public static bool IsValid(string cpf)
             {
-                if (cpf.Distinct().Count() == 1)
-                    return false;
+                if (AllSame(cpf)) return false;
 
-                int[] root = cpf[..NumberLength].Select(c => c - '0').ToArray();
+                Span<int> values = stackalloc int[NumberLength + 1];
+                for (int i = 0; i < NumberLength; i++)
+                    values[i] = cpf[i] - '0';
 
-                int digit1 = CheckDigit(root);
-                int digit2 = CheckDigit([.. root, digit1]);
+                int digit1 = CheckDigit(values[..NumberLength]);
+                values[NumberLength] = digit1;
+                int digit2 = CheckDigit(values);
 
                 return (cpf[9] - '0') == digit1
                     && (cpf[10] - '0') == digit2;
             }
 
-            private static int CheckDigit(int[] values)
+            private static int CheckDigit(ReadOnlySpan<int> values)
             {
                 int weight = values.Length + 1;
-                int sum = values.Sum(v => v * weight--);
+                int sum = 0;
+                for (int i = 0; i < values.Length; i++)
+                    sum += values[i] * weight--;
                 int remainder = sum % Modulus;
                 return remainder < CheckNumberLength ? 0 : Modulus - remainder;
             }

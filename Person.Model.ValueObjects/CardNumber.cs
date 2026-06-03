@@ -36,10 +36,28 @@ namespace Person.Model.ValueObjects
             new(cardNumber);
 
         /// <summary>
-        /// Returns the number formatted in groups of 4 digits separated by spaces.
-        /// Example: <c>4929 6220 4125 4286</c>.
+        /// Returns the card number with all but the last 4 digits masked.
+        /// Example: <c>**** **** **** 4286</c>.
+        /// Use <see cref="ToFormatted"/> to obtain the full unmasked number.
         /// </summary>
         public override string ToString()
+        {
+            if (_number is null) return string.Empty;
+            int maskUntil = _number.Length - 4;
+            var sb = new StringBuilder(_number.Length + _number.Length / 4);
+            for (int i = 0; i < _number.Length; i++)
+            {
+                if (i > 0 && i % 4 == 0) sb.Append(' ');
+                sb.Append(i < maskUntil ? '*' : _number[i]);
+            }
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Returns the full card number formatted in groups of 4 digits separated by spaces.
+        /// Example: <c>4929 6220 4125 4286</c>.
+        /// </summary>
+        public string ToFormatted()
         {
             if (_number is null) return string.Empty;
             var sb = new StringBuilder(_number.Length + _number.Length / 4);
