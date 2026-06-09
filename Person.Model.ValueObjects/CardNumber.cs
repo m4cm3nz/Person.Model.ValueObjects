@@ -11,9 +11,6 @@ namespace Person.Model.ValueObjects
     {
         private readonly string _number;
 
-        /// <summary>The card number without formatting.</summary>
-        public string Number => _number;
-
         /// <summary>
         /// Constructs a CardNumber from a digit string.
         /// </summary>
