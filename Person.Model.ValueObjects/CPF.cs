@@ -1,4 +1,6 @@
 using System;
+using System.Text.Json.Serialization;
+using Person.Model.ValueObjects.Json;
 
 namespace Person.Model.ValueObjects
 {
@@ -8,6 +10,7 @@ namespace Person.Model.ValueObjects
     /// Format: 9-digit root + 2 check digits (11 numeric digits total).
     /// Accepts input with or without the formatting mask (<c>123.456.789-09</c>).
     /// </summary>
+    [JsonConverter(typeof(CpfConverter))]
     public readonly struct CPF : IEquatable<CPF>
     {
         private const int CheckNumberLength = 2;

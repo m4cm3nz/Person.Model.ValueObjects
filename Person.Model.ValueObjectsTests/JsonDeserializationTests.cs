@@ -25,9 +25,47 @@ namespace Person.Model.ValueObjects.Tests
         public CNPJ Cnpj { get; set; }
     }
 
+    // No [JsonConverter] attributes — relies entirely on the struct-level [JsonConverter] attribute.
+    internal class DummyWithAutoConverters
+    {
+        public string Name { get; set; }
+        public CPF Cpf { get; set; }
+        public CNPJ Cnpj { get; set; }
+        public Mobile Mobile { get; set; }
+        public LandLine? LandLine { get; set; }
+        public CardNumber CardNumber { get; set; }
+    }
+
     [TestFixture]
     internal class JsonDeserializationTests
     {
+        // ------------------------------------------------------------------ //
+        // Struct-level [JsonConverter] — no property annotation needed       //
+        // ------------------------------------------------------------------ //
+
+        [Test]
+        public void AllValueObjectsRoundTripWithoutPropertyAnnotationsTest()
+        {
+            var original = new DummyWithAutoConverters
+            {
+                Name = "Rafael",
+                Cpf = "52998224725",
+                Cnpj = "11222333000181",
+                Mobile = "51985680052",
+                LandLine = "5136350102",
+                CardNumber = new CardNumber("4111111111111111"),
+            };
+
+            var json = JsonSerializer.Serialize(original);
+            var result = JsonSerializer.Deserialize<DummyWithAutoConverters>(json);
+
+            Assert.That(result.Cpf, Is.EqualTo(original.Cpf));
+            Assert.That(result.Cnpj, Is.EqualTo(original.Cnpj));
+            Assert.That(result.Mobile, Is.EqualTo(original.Mobile));
+            Assert.That(result.LandLine, Is.EqualTo(original.LandLine));
+            Assert.That(result.CardNumber, Is.EqualTo(original.CardNumber));
+        }
+
         [Test]
         public void ShouldBeAbleToDeserializeMobileAndLandlineUsingTextJson()
         {
