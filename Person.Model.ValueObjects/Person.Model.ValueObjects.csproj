@@ -15,13 +15,13 @@
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
 		<PackageProjectUrl>https://github.com/m4cm3nz/Person.Model.ValueObjects</PackageProjectUrl>
-		<PackageReadmeFile>readme.md</PackageReadmeFile>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<Version>10.0.0-preview.1</Version>
 		<AssemblyVersion>10.0.0.0</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Include="..\readme.md" Pack="true" PackagePath="\" />
+		<None Include="..\README.md" Pack="true" PackagePath="\" />
 		<None Include="..\CHANGELOG.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
