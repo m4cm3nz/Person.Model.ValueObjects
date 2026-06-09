@@ -1,5 +1,7 @@
 using System;
 using System.Text;
+using System.Text.Json.Serialization;
+using Person.Model.ValueObjects.Json;
 
 namespace Person.Model.ValueObjects
 {
@@ -7,12 +9,10 @@ namespace Person.Model.ValueObjects
     /// Immutable value object representing a valid payment card number.
     /// Validates the number via the Luhn algorithm (mod 10). Accepts cards with 13 to 19 digits.
     /// </summary>
+    [JsonConverter(typeof(CardNumberConverter))]
     public readonly struct CardNumber : IEquatable<CardNumber>
     {
         private readonly string _number;
-
-        /// <summary>The card number without formatting.</summary>
-        public string Number => _number;
 
         /// <summary>
         /// Constructs a CardNumber from a digit string.

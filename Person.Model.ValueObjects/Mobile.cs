@@ -1,5 +1,7 @@
 using System;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using Person.Model.ValueObjects.Json;
 
 namespace Person.Model.ValueObjects
 {
@@ -12,6 +14,7 @@ namespace Person.Model.ValueObjects
     /// regardless of the input format.
     /// </para>
     /// </summary>
+    [JsonConverter(typeof(MobileConverter))]
     public readonly struct Mobile : IPhoneNumber, IEquatable<Mobile>
     {
         private const int MaxInputLength = 30;

@@ -267,8 +267,7 @@ formatted number when the unmasked value is required.
 ```csharp
 CardNumber card = "4929622041254286";
 
-Console.WriteLine((string)card);       // 4929622041254286
-Console.WriteLine(card.Number);        // 4929622041254286
+Console.WriteLine((string)card);       // 4929622041254286  (raw digits)
 Console.WriteLine(card.ToString());    // **** **** **** 4286  (masked — safe for logs)
 Console.WriteLine(card.ToFormatted()); // 4929 6220 4125 4286
 ```
@@ -286,29 +285,60 @@ CardNumber.IsValid(null);              // false
 
 ## JSON converters
 
-Converters for `System.Text.Json` are available in the `Person.Model.ValueObjects.Json` namespace
-for `LandLine`, `Mobile`, and `CardNumber`.
+All five value objects carry a `[JsonConverter]` attribute on the struct itself.
+`System.Text.Json` discovers the converter automatically — no property annotation
+or `options.Converters.Add()` call is needed.
 
-> **v10 breaking change** — `LandLineConverter` and `MobileConverter` previously serialized a JSON
-> object (`{"Raw":"...","CountryCode":"...","AreaCode":"...","Number":"..."}`). They now serialize as
-> a plain JSON string (the canonical `Raw` value), consistent with `CardNumberConverter`. Existing
-> payloads produced with the old converters are **not** compatible with this version.
+| Type | Converter | Wire format |
+|---|---|---|
+| `CPF` | `CpfConverter` | `"52998224725"` |
+| `CNPJ` | `CnpjConverter` | `"11222333000181"` |
+| `Mobile` | `MobileConverter` | `"5551985680052"` |
+| `LandLine` | `LandLineConverter` | `"555136352520"` |
+| `CardNumber` | `CardNumberConverter` | `"4929622041254286"` |
+
+All converters serialize as a **plain JSON string** — the canonical digit form, never the
+formatted mask (e.g. `123.456.789-09`).
 
 ```csharp
-// via JsonSerializerOptions
-var options = new JsonSerializerOptions();
-options.Converters.Add(new CardNumberConverter());
-
-// via attribute
-public class Payment
+public class Subscriber
 {
-    [JsonConverter(typeof(CardNumberConverter))]
-    public CardNumber? CardNumber { get; set; }
-
-    [JsonConverter(typeof(MobileConverter))]
-    public Mobile Mobile { get; set; }
-
-    [JsonConverter(typeof(LandLineConverter))]
+    public CPF      Cpf      { get; set; }
+    public CNPJ?    Cnpj     { get; set; }
+    public Mobile   Mobile   { get; set; }
     public LandLine? LandLine { get; set; }
+    public CardNumber CardNumber { get; set; }
 }
+
+// just works — no [JsonConverter] annotations required
+var json   = JsonSerializer.Serialize(subscriber);
+var result = JsonSerializer.Deserialize<Subscriber>(json);
 ```
+
+### Null handling
+
+| Scenario | Behavior |
+|---|---|
+| JSON `null` for nullable property (`T?`) | returns `null` |
+| JSON `null` for non-nullable property (`T`) | `JsonException` |
+| Non-string token (number, boolean, object) | `JsonException` |
+| Invalid value (bad format, wrong check digits) | constructor exception propagates |
+
+```csharp
+// nullable — null JSON produces null value
+CNPJ?    cnpj    = JsonSerializer.Deserialize<CNPJ?>("null");    // null
+LandLine? line   = JsonSerializer.Deserialize<LandLine?>("null"); // null
+
+// non-nullable — null JSON throws
+JsonSerializer.Deserialize<CPF>("null");  // JsonException
+```
+
+> **v10 breaking changes**
+> - `LandLineConverter` and `MobileConverter` previously serialized a JSON object
+>   (`{"Raw":"...","CountryCode":"...","AreaCode":"...","Number":"..."}`). They now
+>   serialize as a plain JSON string. Existing payloads produced with the old converters
+>   are **not** compatible with this version.
+> - `LandLineConverter` changed from `JsonConverter<LandLine?>` to `JsonConverter<LandLine>`.
+>   Property-level `[JsonConverter(typeof(LandLineConverter))]` annotations remain valid
+>   but are no longer needed.
+> - `CpfConverter` and `CnpjConverter` are new in v10.

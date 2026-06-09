@@ -1,4 +1,6 @@
 using System;
+using System.Text.Json.Serialization;
+using Person.Model.ValueObjects.Json;
 
 namespace Person.Model.ValueObjects
 {
@@ -23,6 +25,7 @@ namespace Person.Model.ValueObjects
     /// </para>
     /// <see href="https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/perguntas-e-respostas/cnpj/cnpj-alfanumerico.pdf"/>
     /// </summary>
+    [JsonConverter(typeof(CnpjConverter))]
     public readonly struct CNPJ : IEquatable<CNPJ>
     {
         private const int CheckNumberLength = 2;
