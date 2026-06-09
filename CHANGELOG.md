@@ -22,12 +22,34 @@
 - `GetOnlyNumbersFrom(string)` removed from the public API — digit extraction is now internal.
 - `ToString()` format corrected: now returns `+55 (51) 3635-2520` (area code in parentheses, hyphen in local number). The previous format was `+55 (51 3635 2520)`.
 
-#### JSON converters (LandLine / Mobile)
+#### JSON converters
 - `LandLineConverter` and `MobileConverter` previously serialized a JSON object (`{"Raw":"...","CountryCode":"...","AreaCode":"...","Number":"..."}`). They now serialize as a plain JSON string (the canonical `Raw` value), consistent with `CardNumberConverter`. Existing payloads produced with the old converters are **not** compatible with this version.
+- `LandLineConverter` changed from `JsonConverter<LandLine?>` to `JsonConverter<LandLine>`. Property-level `[JsonConverter(typeof(LandLineConverter))]` annotations remain valid but are no longer required.
+
+#### CardNumber
+- `Number` property removed from the public API — the raw PAN is accessible via the implicit `string` cast (`(string)card`). This prevents accidental exposure in logs, default serialization, and reflection-based tooling.
 
 ---
 
 ### New features
+
+#### JSON converters — all five value objects
+- `CpfConverter` and `CnpjConverter` added to the `Person.Model.ValueObjects.Json` namespace.
+- All five value objects (`CPF`, `CNPJ`, `Mobile`, `LandLine`, `CardNumber`) now carry a `[JsonConverter]` attribute on the struct itself. `System.Text.Json` discovers the correct converter automatically — no `[JsonConverter]` annotation on properties and no `options.Converters.Add()` call is needed.
+- Null handling: JSON `null` for a nullable property (`T?`) returns `null`; JSON `null` for a non-nullable property throws `JsonException`; non-string tokens (numbers, booleans, objects) throw `JsonException`.
+
+```csharp
+public class Subscriber
+{
+    public CPF       Cpf      { get; set; }
+    public CNPJ?     Cnpj     { get; set; }
+    public Mobile    Mobile   { get; set; }
+    public LandLine? LandLine { get; set; }
+}
+
+var json   = JsonSerializer.Serialize(subscriber);            // works out of the box
+var result = JsonSerializer.Deserialize<Subscriber>(json);    // works out of the box
+```
 
 #### CNPJ — alphanumeric format
 Support for the new alphanumeric CNPJ format from Receita Federal (IN RFB nº 2.229/2024), effective July 2026.
