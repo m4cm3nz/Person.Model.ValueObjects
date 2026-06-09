@@ -16,6 +16,15 @@ namespace Person.Model.ValueObjects.Tests
         public LandLine? LandLine { get; set; }
     }
 
+    internal class DummySubscriber
+    {
+        public string Name { get; set; }
+        [JsonConverter(typeof(CpfConverter))]
+        public CPF Cpf { get; set; }
+        [JsonConverter(typeof(CnpjConverter))]
+        public CNPJ Cnpj { get; set; }
+    }
+
     [TestFixture]
     internal class JsonDeserializationTests
     {
@@ -74,12 +83,86 @@ namespace Person.Model.ValueObjects.Tests
         // ------------------------------------------------------------------ //
 
         [Test]
+        public void MobileConverterDeserializesFromPlainStringTest()
+        {
+            Mobile expected = "51985680052";
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new MobileConverter());
+
+            var result = JsonSerializer.Deserialize<Mobile>($"\"{expected.Raw}\"", options);
+
+            Assert.That(result, Is.EqualTo(expected));
+        }
+
+        [Test]
         public void MobileConverterThrowsOnNullTokenTest()
         {
             var options = new JsonSerializerOptions();
             options.Converters.Add(new MobileConverter());
 
             Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Mobile>("null", options));
+        }
+
+        [Test]
+        public void LandLineConverterDeserializesFromPlainStringTest()
+        {
+            LandLine expected = "5136350102";
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new LandLineConverter());
+
+            var result = JsonSerializer.Deserialize<LandLine?>($"\"{expected.Raw}\"", options);
+
+            Assert.That(result, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void LandLineConverterSerializesNullAsJsonNullTest()
+        {
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new LandLineConverter());
+
+            var json = JsonSerializer.Serialize<LandLine?>(null, options);
+            var doc = JsonDocument.Parse(json);
+
+            Assert.That(doc.RootElement.ValueKind, Is.EqualTo(JsonValueKind.Null));
+        }
+
+        [Test]
+        public void CardNumberConverterSerializesAsPlainStringTest()
+        {
+            CardNumber cardNumber = new("4111111111111111");
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new CardNumberConverter());
+
+            var json = JsonSerializer.Serialize(cardNumber, options);
+            var doc = JsonDocument.Parse(json);
+
+            Assert.That(doc.RootElement.ValueKind, Is.EqualTo(JsonValueKind.String));
+            Assert.That(doc.RootElement.GetString(), Is.EqualTo("4111111111111111"));
+        }
+
+        [Test]
+        public void CardNumberConverterDeserializesFromPlainStringTest()
+        {
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new CardNumberConverter());
+
+            var result = JsonSerializer.Deserialize<CardNumber>("\"4111111111111111\"", options);
+
+            Assert.That(result, Is.EqualTo(new CardNumber("4111111111111111")));
+        }
+
+        [Test]
+        public void CardNumberConverterRoundTripTest()
+        {
+            CardNumber cardNumber = new("4111111111111111");
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new CardNumberConverter());
+
+            var json = JsonSerializer.Serialize(cardNumber, options);
+            var result = JsonSerializer.Deserialize<CardNumber>(json, options);
+
+            Assert.That(result, Is.EqualTo(cardNumber));
         }
 
         [Test]
@@ -100,6 +183,103 @@ namespace Person.Model.ValueObjects.Tests
             var result = JsonSerializer.Deserialize<LandLine?>("null", options);
 
             Assert.That(result, Is.Null);
+        }
+
+        // ------------------------------------------------------------------ //
+        // CPF converter                                                       //
+        // ------------------------------------------------------------------ //
+
+        [Test]
+        public void CpfConverterSerializesAsPlainStringTest()
+        {
+            CPF cpf = "52998224725";
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new CpfConverter());
+
+            var json = JsonSerializer.Serialize(cpf, options);
+            var doc = JsonDocument.Parse(json);
+
+            Assert.That(doc.RootElement.ValueKind, Is.EqualTo(JsonValueKind.String));
+            Assert.That(doc.RootElement.GetString(), Is.EqualTo("52998224725"));
+        }
+
+        [Test]
+        public void CpfConverterRoundTripWithCaseInsensitiveOptionsTest()
+        {
+            var subscriber = new DummySubscriber
+            {
+                Name = "Rafael",
+                Cpf = "52998224725",
+                Cnpj = "11222333000181",
+            };
+
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            options.Converters.Add(new CpfConverter());
+            options.Converters.Add(new CnpjConverter());
+
+            var json = JsonSerializer.Serialize(subscriber, options);
+            var result = JsonSerializer.Deserialize<DummySubscriber>(json, options);
+
+            Assert.That(result.Cpf, Is.EqualTo(subscriber.Cpf));
+            Assert.That(result.Cnpj, Is.EqualTo(subscriber.Cnpj));
+        }
+
+        [Test]
+        public void CpfConverterDeserializesFromPlainStringTest()
+        {
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new CpfConverter());
+
+            var result = JsonSerializer.Deserialize<CPF>("\"52998224725\"", options);
+
+            Assert.That(result, Is.EqualTo(new CPF("52998224725")));
+        }
+
+        [Test]
+        public void CpfConverterThrowsOnNullTokenTest()
+        {
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new CpfConverter());
+
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<CPF>("null", options));
+        }
+
+        // ------------------------------------------------------------------ //
+        // CNPJ converter                                                      //
+        // ------------------------------------------------------------------ //
+
+        [Test]
+        public void CnpjConverterSerializesAsPlainStringTest()
+        {
+            CNPJ cnpj = "11222333000181";
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new CnpjConverter());
+
+            var json = JsonSerializer.Serialize(cnpj, options);
+            var doc = JsonDocument.Parse(json);
+
+            Assert.That(doc.RootElement.ValueKind, Is.EqualTo(JsonValueKind.String));
+            Assert.That(doc.RootElement.GetString(), Is.EqualTo("11222333000181"));
+        }
+
+        [Test]
+        public void CnpjConverterDeserializesFromPlainStringTest()
+        {
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new CnpjConverter());
+
+            var result = JsonSerializer.Deserialize<CNPJ>("\"11222333000181\"", options);
+
+            Assert.That(result, Is.EqualTo(new CNPJ("11222333000181")));
+        }
+
+        [Test]
+        public void CnpjConverterThrowsOnNullTokenTest()
+        {
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new CnpjConverter());
+
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<CNPJ>("null", options));
         }
     }
 }
