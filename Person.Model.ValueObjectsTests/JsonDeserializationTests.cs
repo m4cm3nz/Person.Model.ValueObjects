@@ -104,6 +104,15 @@ namespace Person.Model.ValueObjects.Tests
         }
 
         [Test]
+        public void CardNumberConverterThrowsOnNonStringTokenTest()
+        {
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new CardNumberConverter());
+
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<CardNumber>("4111111111111111", options));
+        }
+
+        [Test]
         public void LandLineConverterDeserializesFromPlainStringTest()
         {
             LandLine expected = "5136350102";
@@ -244,6 +253,26 @@ namespace Person.Model.ValueObjects.Tests
             Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<CPF>("null", options));
         }
 
+        [Test]
+        public void CpfConverterThrowsOnNonStringTokenTest()
+        {
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new CpfConverter());
+
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<CPF>("52998224725", options));
+        }
+
+        [Test]
+        public void CpfConverterThrowsOnPropertyLevelNullTest()
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            options.Converters.Add(new CpfConverter());
+            options.Converters.Add(new CnpjConverter());
+
+            Assert.Throws<JsonException>(() =>
+                JsonSerializer.Deserialize<DummySubscriber>("{\"Name\":\"x\",\"Cpf\":null,\"Cnpj\":\"11222333000181\"}", options));
+        }
+
         // ------------------------------------------------------------------ //
         // CNPJ converter                                                      //
         // ------------------------------------------------------------------ //
@@ -280,6 +309,15 @@ namespace Person.Model.ValueObjects.Tests
             options.Converters.Add(new CnpjConverter());
 
             Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<CNPJ>("null", options));
+        }
+
+        [Test]
+        public void CnpjConverterThrowsOnNonStringTokenTest()
+        {
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new CnpjConverter());
+
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<CNPJ>("11222333000181", options));
         }
     }
 }
