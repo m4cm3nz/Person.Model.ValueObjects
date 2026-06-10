@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased]
+
+### New features
+
+- `CEP` value object: Brazilian postal code (Correios), 8-digit numeric, mask `XXXXX-XXX`. Follows the same `readonly struct` + `[JsonConverter(typeof(CepConverter))]` pattern as all other types in the library.
+
+---
+
 ## [10.0.1] — 2026-06-10
 
 ### Bug fixes

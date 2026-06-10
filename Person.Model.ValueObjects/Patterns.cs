@@ -7,6 +7,9 @@ namespace Person.Model.ValueObjects
         [GeneratedRegex(@"^[A-Z0-9]{12}[0-9]{2}$")]
         internal static partial Regex CnpjFormat();
 
+        [GeneratedRegex(@"^[0-9]{8}$")]
+        internal static partial Regex CepFormat();
+
         [GeneratedRegex(@"^[0-9]{11}$")]
         internal static partial Regex CpfFormat();
 

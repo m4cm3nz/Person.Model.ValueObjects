@@ -285,6 +285,49 @@ CardNumber.IsValid(null);              // false
 
 ---
 
+## CEP
+
+Brazilian postal code (Código de Endereçamento Postal) defined by Correios.
+8 numeric digits, optionally formatted as `XXXXX-XXX`. No check digit — structural validation only.
+
+### Creation
+
+```csharp
+var cep = new CEP("01310100");
+var cep = new CEP("01310-100"); // mask accepted
+
+CEP cep = "01310100";  // implicit operator
+CEP? cep = null;       // nullable
+```
+
+| Exception | Condition |
+|---|---|
+| `ArgumentNullException` | `null` passed to constructor |
+| `InvalidOperationException` | `null` assigned via implicit operator — use `CEP?` |
+| `ArgumentOutOfRangeException` | non-numeric, wrong length |
+
+### Properties
+
+```csharp
+CEP cep = "01310100";
+
+Console.WriteLine((string)cep);     // 01310100
+Console.WriteLine(cep.ToString());  // 01310-100
+```
+
+### Static helpers
+
+```csharp
+CEP.IsValid("01310100");    // true
+CEP.IsValid("01310-100");   // true  (mask accepted)
+CEP.IsValid("0131010");     // false (too short)
+CEP.IsValid(null);          // false
+
+CEP.StripMask("01310-100"); // 01310100
+```
+
+---
+
 ## JSON converters
 
 All five value objects carry a `[JsonConverter]` attribute on the struct itself.
@@ -298,6 +341,7 @@ or `options.Converters.Add()` call is needed.
 | `Mobile` | `MobileConverter` | `"5551985680052"` |
 | `LandLine` | `LandLineConverter` | `"555136352520"` |
 | `CardNumber` | `CardNumberConverter` | `"4929622041254286"` |
+| `CEP` | `CepConverter` | `"01310100"` |
 
 All converters serialize as a **plain JSON string** — the canonical digit form, never the
 formatted mask (e.g. `123.456.789-09`).
