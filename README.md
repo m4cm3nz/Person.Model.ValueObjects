@@ -1,5 +1,7 @@
 # Person.Model.ValueObjects
 
+[![CI](https://github.com/m4cm3nz/Person.Model.ValueObjects/actions/workflows/ci.yml/badge.svg)](https://github.com/m4cm3nz/Person.Model.ValueObjects/actions/workflows/ci.yml)
+
 A .NET 10.0 collection of value objects for modelling Brazilian person domain properties.
 
 ```csharp
