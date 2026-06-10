@@ -1,6 +1,6 @@
 # Changelog
 
-## [10.0.0-preview.1] — 2026-06-02
+## [10.0.0] — 2026-06-09
 
 ### Breaking changes
 
