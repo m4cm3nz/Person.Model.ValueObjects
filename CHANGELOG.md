@@ -1,5 +1,13 @@
 # Changelog
 
+## [10.0.1] — 2026-06-10
+
+### Bug fixes
+
+- Re-published with correct package contents. The `10.0.0` NuGet package was built from an earlier state and was missing `CpfConverter`, `CnpjConverter`, and the `[JsonConverter]` attributes on all five value object structs.
+
+---
+
 ## [10.0.0] — 2026-06-09
 
 ### Breaking changes
