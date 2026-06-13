@@ -330,7 +330,7 @@ CEP.StripMask("01310-100"); // 01310100
 
 ## JSON converters
 
-All five value objects carry a `[JsonConverter]` attribute on the struct itself.
+All six value objects carry a `[JsonConverter]` attribute on the struct itself.
 `System.Text.Json` discovers the converter automatically — no property annotation
 or `options.Converters.Add()` call is needed.
 
