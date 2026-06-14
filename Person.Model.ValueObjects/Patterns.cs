@@ -13,6 +13,9 @@ namespace Person.Model.ValueObjects
         [GeneratedRegex(@"^[0-9]{11}$")]
         internal static partial Regex CpfFormat();
 
+        [GeneratedRegex(@"^[0-9]{11}$")]
+        internal static partial Regex PisFormat();
+
         [GeneratedRegex(
             @"^(\+?55 ?)? ?(\([1-9]{2}\)|[1-9]{2}) ?([2-5][0-9]{3}[- ]?[0-9]{4})$",
             RegexOptions.NonBacktracking)]
