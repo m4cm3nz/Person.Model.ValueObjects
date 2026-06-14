@@ -112,8 +112,18 @@ namespace Person.Model.ValueObjects
             // Portaria MTE / DATAPREV: weights applied to the first 10 digits.
             private static ReadOnlySpan<byte> Weights => [3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
 
+            private static bool AllSame(string s)
+            {
+                char first = s[0];
+                for (int i = 1; i < s.Length; i++)
+                    if (s[i] != first) return false;
+                return true;
+            }
+
             public static bool IsValid(string pis)
             {
+                if (AllSame(pis)) return false;
+
                 ReadOnlySpan<byte> weights = Weights;
                 int sum = 0;
                 for (int i = 0; i < weights.Length; i++)
@@ -122,7 +132,7 @@ namespace Person.Model.ValueObjects
                 int remainder = sum % 11;
                 int expected = remainder < 2 ? 0 : 11 - remainder;
 
-                return (pis[10] - '0') == expected;
+                return (pis[PisLength - 1] - '0') == expected;
             }
         }
     }

@@ -101,6 +101,7 @@ namespace Person.Model.ValueObjects.Tests
         [Test]
         [TestCase("12345678910")]  // wrong check digit
         [TestCase("10000000001")]  // wrong check digit
+        [TestCase("00000000000")]  // null sentinel — passes mod-11 but is never a real PIS
         [TestCase("1234567891")]   // too short
         [TestCase("123456789100")] // too long
         [TestCase("1234567891A")]  // non-numeric
@@ -217,6 +218,26 @@ namespace Person.Model.ValueObjects.Tests
         [TestCase("10000000001")] // check digit should be 8
         [TestCase("11122233391")] // check digit should be 0
         public void InvalidCheckDigitShouldThrowInvalidCastTest(string value)
+        {
+            Assert.Throws<InvalidCastException>(() => new PIS(value));
+        }
+
+        // ------------------------------------------------------------------ //
+        // Homogeneous sequences                                                //
+        // ------------------------------------------------------------------ //
+
+        [Test]
+        [TestCase("00000000000")] // passes mod-11 but is a known null sentinel (eSocial, RAIS, CAGED)
+        [TestCase("11111111111")]
+        [TestCase("22222222222")]
+        [TestCase("33333333333")]
+        [TestCase("44444444444")]
+        [TestCase("55555555555")]
+        [TestCase("66666666666")]
+        [TestCase("77777777777")]
+        [TestCase("88888888888")]
+        [TestCase("99999999999")]
+        public void HomogeneousSequenceShouldThrowInvalidCastTest(string value)
         {
             Assert.Throws<InvalidCastException>(() => new PIS(value));
         }
