@@ -396,11 +396,13 @@ formatted mask (e.g. `123.456.789-09`).
 ```csharp
 public class Subscriber
 {
-    public CPF      Cpf      { get; set; }
-    public CNPJ?    Cnpj     { get; set; }
-    public Mobile   Mobile   { get; set; }
-    public LandLine? LandLine { get; set; }
+    public CPF        Cpf        { get; set; }
+    public CNPJ?      Cnpj       { get; set; }
+    public Mobile     Mobile     { get; set; }
+    public LandLine?  LandLine   { get; set; }
     public CardNumber CardNumber { get; set; }
+    public CEP?       Cep        { get; set; }
+    public PIS?       Pis        { get; set; }
 }
 
 // just works — no [JsonConverter] annotations required
