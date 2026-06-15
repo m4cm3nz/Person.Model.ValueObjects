@@ -16,6 +16,10 @@ namespace Person.Model.ValueObjects
         [GeneratedRegex(@"^[0-9]{11}$")]
         internal static partial Regex PisFormat();
 
+        // Practical RFC 5321/5322 subset (after lowercasing): local@domain, domain requires dot.
+        [GeneratedRegex(@"^[a-z0-9!#$%&'*+/=?^_`{|}~.-]+@[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$")]
+        internal static partial Regex EmailFormat();
+
         [GeneratedRegex(
             @"^(\+?55 ?)? ?(\([1-9]{2}\)|[1-9]{2}) ?([2-5][0-9]{3}[- ]?[0-9]{4})$",
             RegexOptions.NonBacktracking)]
