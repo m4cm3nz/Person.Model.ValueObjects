@@ -334,7 +334,7 @@ CEP.StripMask("01310-100"); // 01310100
 
 11 numeric digits with two weighted check digits per the SENATRAN algorithm
 (Resolução CONTRAN nº 541/2015). No standard display mask — the number is stored and
-displayed as a plain 11-digit string.
+displayed as a plain 11-digit string. Leading and trailing whitespace is stripped automatically.
 
 ### Creation
 
@@ -367,6 +367,8 @@ Console.WriteLine(cnh.ToString()); // 84718735264
 CNH.IsValid("84718735264"); // true
 CNH.IsValid("84718735261"); // false (wrong check digit)
 CNH.IsValid(null);          // false
+
+CNH.StripMask("  84718735264  "); // 84718735264
 ```
 
 ---

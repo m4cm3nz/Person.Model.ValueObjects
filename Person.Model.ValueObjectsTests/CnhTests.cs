@@ -106,6 +106,7 @@ namespace Person.Model.ValueObjects.Tests
         }
 
         [Test]
+        [TestCase("84718735254")]  // wrong first check digit (should be 6)
         [TestCase("84718735261")]  // wrong second check digit (should be 4)
         [TestCase("12345678901")]  // wrong second check digit (should be 0)
         [TestCase("20000001100")]  // wrong second check digit (should be 7)
@@ -113,6 +114,7 @@ namespace Person.Model.ValueObjects.Tests
         [TestCase("1234567890")]   // too short
         [TestCase("123456789000")] // too long
         [TestCase("1234567890A")]  // non-numeric
+        [TestCase("847187352641234567891")] // exceeds MaxInputLength (21 chars)
         [TestCase("")]
         public void IsValidReturnsFalseForInvalidInputTest(string value)
         {
@@ -199,9 +201,10 @@ namespace Person.Model.ValueObjects.Tests
 
         [Test]
         [TestCase("")]
-        [TestCase("1234567890")]    // 10 digits
-        [TestCase("123456789000")]  // 12 digits
-        [TestCase("1234567890A")]   // non-numeric
+        [TestCase("1234567890")]                       // 10 digits
+        [TestCase("123456789000")]                     // 12 digits
+        [TestCase("1234567890A")]                      // non-numeric
+        [TestCase("847187352641234567891")]             // 21 chars — exceeds MaxInputLength
         public void InvalidFormatShouldThrowArgumentOutOfRangeTest(string value)
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => new CNH(value));
@@ -212,6 +215,7 @@ namespace Person.Model.ValueObjects.Tests
         // ------------------------------------------------------------------ //
 
         [Test]
+        [TestCase("84718735254")] // first check digit should be 6, got 5
         [TestCase("84718735261")] // second check digit should be 4
         [TestCase("12345678901")] // second check digit should be 0
         [TestCase("20000001100")] // second check digit should be 7 (flag case)
