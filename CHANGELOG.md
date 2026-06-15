@@ -5,6 +5,7 @@
 ### New features
 
 - `CEP` value object: Brazilian postal code (Correios), 8-digit numeric, mask `XXXXX-XXX`. Follows the same `readonly struct` + `[JsonConverter(typeof(CepConverter))]` pattern as all other types in the library.
+- `CNH` value object: Brazilian driver's license number (Carteira Nacional de Habilitação), 11-digit numeric with two weighted check digits per the SENATRAN algorithm (Resolução CONTRAN nº 541/2015). No standard display mask — stored and serialized as plain digits.
 
 ---
 

@@ -328,9 +328,52 @@ CEP.StripMask("01310-100"); // 01310100
 
 ---
 
+## CNH
+
+*Carteira Nacional de Habilitação* — Brazilian driver's license number issued by SENATRAN/DETRAN.
+
+11 numeric digits with two weighted check digits per the SENATRAN algorithm
+(Resolução CONTRAN nº 541/2015). No standard display mask — the number is stored and
+displayed as a plain 11-digit string.
+
+### Creation
+
+```csharp
+var cnh = new CNH("84718735264");
+
+CNH cnh = "84718735264";  // implicit operator
+CNH? cnh = null;          // nullable
+```
+
+| Exception | Condition |
+|---|---|
+| `ArgumentNullException` | `null` passed to constructor |
+| `InvalidOperationException` | `null` assigned via implicit operator — use `CNH?` |
+| `ArgumentOutOfRangeException` | non-numeric or wrong length |
+| `InvalidCastException` | check digits do not match |
+
+### Properties
+
+```csharp
+CNH cnh = "84718735264";
+
+Console.WriteLine((string)cnh);    // 84718735264
+Console.WriteLine(cnh.ToString()); // 84718735264
+```
+
+### Static helpers
+
+```csharp
+CNH.IsValid("84718735264"); // true
+CNH.IsValid("84718735261"); // false (wrong check digit)
+CNH.IsValid(null);          // false
+```
+
+---
+
 ## JSON converters
 
-All five value objects carry a `[JsonConverter]` attribute on the struct itself.
+All seven value objects carry a `[JsonConverter]` attribute on the struct itself.
 `System.Text.Json` discovers the converter automatically — no property annotation
 or `options.Converters.Add()` call is needed.
 
@@ -342,6 +385,7 @@ or `options.Converters.Add()` call is needed.
 | `LandLine` | `LandLineConverter` | `"555136352520"` |
 | `CardNumber` | `CardNumberConverter` | `"4929622041254286"` |
 | `CEP` | `CepConverter` | `"01310100"` |
+| `CNH` | `CnhConverter` | `"84718735264"` |
 
 All converters serialize as a **plain JSON string** — the canonical digit form, never the
 formatted mask (e.g. `123.456.789-09`).
@@ -349,11 +393,13 @@ formatted mask (e.g. `123.456.789-09`).
 ```csharp
 public class Subscriber
 {
-    public CPF      Cpf      { get; set; }
-    public CNPJ?    Cnpj     { get; set; }
-    public Mobile   Mobile   { get; set; }
-    public LandLine? LandLine { get; set; }
+    public CPF        Cpf        { get; set; }
+    public CNPJ?      Cnpj       { get; set; }
+    public Mobile     Mobile     { get; set; }
+    public LandLine?  LandLine   { get; set; }
     public CardNumber CardNumber { get; set; }
+    public CEP?       Cep        { get; set; }
+    public CNH?       Cnh        { get; set; }
 }
 
 // just works — no [JsonConverter] annotations required
