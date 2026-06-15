@@ -5,6 +5,7 @@
 ### New features
 
 - `CEP` value object: Brazilian postal code (Correios), 8-digit numeric, mask `XXXXX-XXX`. Follows the same `readonly struct` + `[JsonConverter(typeof(CepConverter))]` pattern as all other types in the library.
+- `PIS` value object: Brazilian worker identification number (also known as NIS / PASEP), 11-digit numeric with a weighted check digit (mod 11, weights `3,2,9,8,7,6,5,4,3,2`), mask `XXX.XXXXX.XX-X`.
 
 ---
 

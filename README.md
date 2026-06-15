@@ -285,6 +285,52 @@ CardNumber.IsValid(null);              // false
 
 ---
 
+## PIS
+
+*Programa de Integração Social* — Brazilian worker identification number, also known as NIS (*Número de Identificação Social*) or PASEP (*Patrimônio do Servidor Público*). Issued by Caixa Econômica Federal / DATAPREV.
+
+11 numeric digits with a weighted check digit (mod 11, weights `3,2,9,8,7,6,5,4,3,2`).
+Display mask: `XXX.XXXXX.XX-X`.
+
+### Creation
+
+```csharp
+var pis = new PIS("12345678919");
+var pis = new PIS("123.45678.91-9"); // mask accepted
+
+PIS pis = "12345678919";  // implicit operator
+PIS? pis = null;          // nullable
+```
+
+| Exception | Condition |
+|---|---|
+| `ArgumentNullException` | `null` passed to constructor |
+| `InvalidOperationException` | `null` assigned via implicit operator — use `PIS?` |
+| `ArgumentOutOfRangeException` | non-numeric or wrong length |
+| `InvalidCastException` | check digit does not match |
+
+### Properties
+
+```csharp
+PIS pis = "12345678919";
+
+Console.WriteLine((string)pis);    // 12345678919
+Console.WriteLine(pis.ToString()); // 123.45678.91-9
+```
+
+### Static helpers
+
+```csharp
+PIS.IsValid("12345678919");      // true
+PIS.IsValid("123.45678.91-9");   // true  (mask accepted)
+PIS.IsValid("12345678910");      // false (wrong check digit)
+PIS.IsValid(null);               // false
+
+PIS.StripMask("123.45678.91-9"); // 12345678919
+```
+
+---
+
 ## CEP
 
 Brazilian postal code (Código de Endereçamento Postal) defined by Correios.
@@ -330,7 +376,7 @@ CEP.StripMask("01310-100"); // 01310100
 
 ## JSON converters
 
-All five value objects carry a `[JsonConverter]` attribute on the struct itself.
+All seven value objects carry a `[JsonConverter]` attribute on the struct itself.
 `System.Text.Json` discovers the converter automatically — no property annotation
 or `options.Converters.Add()` call is needed.
 
@@ -342,6 +388,7 @@ or `options.Converters.Add()` call is needed.
 | `LandLine` | `LandLineConverter` | `"555136352520"` |
 | `CardNumber` | `CardNumberConverter` | `"4929622041254286"` |
 | `CEP` | `CepConverter` | `"01310100"` |
+| `PIS` | `PisConverter` | `"12345678919"` |
 
 All converters serialize as a **plain JSON string** — the canonical digit form, never the
 formatted mask (e.g. `123.456.789-09`).
@@ -349,11 +396,13 @@ formatted mask (e.g. `123.456.789-09`).
 ```csharp
 public class Subscriber
 {
-    public CPF      Cpf      { get; set; }
-    public CNPJ?    Cnpj     { get; set; }
-    public Mobile   Mobile   { get; set; }
-    public LandLine? LandLine { get; set; }
+    public CPF        Cpf        { get; set; }
+    public CNPJ?      Cnpj       { get; set; }
+    public Mobile     Mobile     { get; set; }
+    public LandLine?  LandLine   { get; set; }
     public CardNumber CardNumber { get; set; }
+    public CEP?       Cep        { get; set; }
+    public PIS?       Pis        { get; set; }
 }
 
 // just works — no [JsonConverter] annotations required
