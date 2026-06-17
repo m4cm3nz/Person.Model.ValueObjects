@@ -1,0 +1,25 @@
+@page "/"
+
+<PageTitle>Person.Model.ValueObjects — Playground</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="my-6">
+    <div class="mb-6">
+        <MudText Typo="Typo.h4" GutterBottom="true">Experimente os value objects</MudText>
+        <MudText Typo="Typo.body1" Class="mud-text-secondary">
+            Cada card roda o código real do pacote
+            <MudLink Href="https://www.nuget.org/packages/Person.Model.ValueObjects" Target="_blank">
+                Person.Model.ValueObjects</MudLink>
+            no seu navegador (Blazor WebAssembly). Digite um valor para ver validação, máscara,
+            propriedades decompostas e o JSON serializado — ou a exceção lançada quando a entrada é inválida.
+        </MudText>
+    </div>
+
+    <MudGrid Spacing="4">
+        @foreach (var demo in DemoCatalog.All)
+        {
+            <MudItem xs="12" sm="6" md="4">
+                <ValueObjectCard Demo="demo" />
+            </MudItem>
+        }
+    </MudGrid>
+</MudContainer>

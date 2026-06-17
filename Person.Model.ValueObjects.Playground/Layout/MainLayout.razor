@@ -1,0 +1,31 @@
+@inherits LayoutComponentBase
+
+<MudThemeProvider @ref="_themeProvider" @bind-IsDarkMode="_isDarkMode" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="1">
+        <MudIcon Icon="@Icons.Material.Filled.Badge" Class="mr-3" />
+        <MudText Typo="Typo.h6">Person.Model.ValueObjects</MudText>
+        <MudText Typo="Typo.subtitle2" Class="d-none d-sm-flex ml-2 mt-1">— Playground</MudText>
+        <MudSpacer />
+        <MudTooltip Text="@(_isDarkMode ? "Tema claro" : "Tema escuro")">
+            <MudIconButton Icon="@(_isDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
+                           Color="Color.Inherit" OnClick="@(() => _isDarkMode = !_isDarkMode)" />
+        </MudTooltip>
+        <MudTooltip Text="Ver no GitHub">
+            <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit"
+                           Href="https://github.com/m4cm3nz/Person.Model.ValueObjects" Target="_blank" />
+        </MudTooltip>
+    </MudAppBar>
+    <MudMainContent>
+        @Body
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    private MudThemeProvider _themeProvider = null!;
+    private bool _isDarkMode = true;
+}

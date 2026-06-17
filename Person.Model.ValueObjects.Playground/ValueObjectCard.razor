@@ -1,0 +1,91 @@
+@namespace Person.Model.ValueObjects.Playground
+
+<MudCard Elevation="2" Class="d-flex flex-column" Style="height:100%">
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6">@Demo.Name</MudText>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">@Demo.Description</MudText>
+        </CardHeaderContent>
+        <CardHeaderActions>
+            @if (_isValid)
+            {
+                <MudChip T="string" Color="Color.Success" Size="Size.Small"
+                         Icon="@Icons.Material.Filled.CheckCircle">válido</MudChip>
+            }
+            else
+            {
+                <MudChip T="string" Color="Color.Error" Size="Size.Small"
+                         Icon="@Icons.Material.Filled.Cancel">inválido</MudChip>
+            }
+        </CardHeaderActions>
+    </MudCardHeader>
+    <MudCardContent Class="flex-grow-1">
+        <MudTextField T="string" Value="_input" ValueChanged="OnInputChanged" Immediate="true"
+                      Label="Entrada" Placeholder="@Demo.Placeholder" Variant="Variant.Outlined"
+                      Clearable="true" Class="mb-3" />
+
+        @if (_result is not null)
+        {
+            <MudSimpleTable Dense="true" Bordered="false" Striped="true" Elevation="0"
+                            Style="background:transparent">
+                <tbody>
+                    <tr><td>ToString()</td><td><code>@_result.Formatted</code></td></tr>
+                    <tr><td>(string)</td><td><code>@_result.Raw</code></td></tr>
+                    @foreach (var (label, value) in _result.Properties)
+                    {
+                        <tr><td>@label</td><td><code>@value</code></td></tr>
+                    }
+                    <tr><td>JSON</td><td><code>@_result.Json</code></td></tr>
+                </tbody>
+            </MudSimpleTable>
+        }
+        else if (_error is not null)
+        {
+            <MudAlert Severity="Severity.Error" Dense="true" Variant="Variant.Outlined">@_error</MudAlert>
+        }
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter, EditorRequired] public DemoType Demo { get; set; } = null!;
+
+    private string _input = string.Empty;
+    private bool _isValid;
+    private DemoResult? _result;
+    private string? _error;
+
+    protected override void OnInitialized()
+    {
+        _input = Demo.Placeholder;
+        Evaluate();
+    }
+
+    private void OnInputChanged(string? value)
+    {
+        _input = value ?? string.Empty;
+        Evaluate();
+    }
+
+    private void Evaluate()
+    {
+        _result = null;
+        _error = null;
+
+        if (string.IsNullOrWhiteSpace(_input))
+        {
+            _isValid = false;
+            return;
+        }
+
+        _isValid = Demo.IsValid(_input);
+
+        try
+        {
+            _result = Demo.Construct(_input);
+        }
+        catch (Exception ex)
+        {
+            _error = $"{ex.GetType().Name}: {ex.Message}";
+        }
+    }
+}
