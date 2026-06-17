@@ -14,6 +14,9 @@ namespace Person.Model.ValueObjects
         internal static partial Regex CpfFormat();
 
         [GeneratedRegex(@"^[0-9]{11}$")]
+        internal static partial Regex CnhFormat();
+
+        [GeneratedRegex(@"^[0-9]{11}$")]
         internal static partial Regex PisFormat();
 
         // Practical RFC 5321/5322 subset (after lowercasing): local@domain, domain requires dot.

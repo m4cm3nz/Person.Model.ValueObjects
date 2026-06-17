@@ -423,9 +423,54 @@ Email.IsValid(null);                    // false
 
 ---
 
+## CNH
+
+*Carteira Nacional de Habilitação* — Brazilian driver's license number issued by SENATRAN/DETRAN.
+
+11 numeric digits with two weighted check digits per the SENATRAN algorithm
+(Resolução CONTRAN nº 541/2015). No standard display mask — the number is stored and
+displayed as a plain 11-digit string. Leading and trailing whitespace is stripped automatically.
+
+### Creation
+
+```csharp
+var cnh = new CNH("84718735264");
+
+CNH cnh = "84718735264";  // implicit operator
+CNH? cnh = null;          // nullable
+```
+
+| Exception | Condition |
+|---|---|
+| `ArgumentNullException` | `null` passed to constructor |
+| `InvalidOperationException` | `null` assigned via implicit operator — use `CNH?` |
+| `ArgumentOutOfRangeException` | non-numeric or wrong length |
+| `InvalidCastException` | check digits do not match |
+
+### Properties
+
+```csharp
+CNH cnh = "84718735264";
+
+Console.WriteLine((string)cnh);    // 84718735264
+Console.WriteLine(cnh.ToString()); // 84718735264
+```
+
+### Static helpers
+
+```csharp
+CNH.IsValid("84718735264"); // true
+CNH.IsValid("84718735261"); // false (wrong check digit)
+CNH.IsValid(null);          // false
+
+CNH.StripMask("  84718735264  "); // 84718735264
+```
+
+---
+
 ## JSON converters
 
-All eight value objects carry a `[JsonConverter]` attribute on the struct itself.
+All nine value objects carry a `[JsonConverter]` attribute on the struct itself.
 `System.Text.Json` discovers the converter automatically — no property annotation
 or `options.Converters.Add()` call is needed.
 
@@ -439,6 +484,7 @@ or `options.Converters.Add()` call is needed.
 | `CEP` | `CepConverter` | `"01310100"` |
 | `PIS` | `PisConverter` | `"12345678919"` |
 | `Email` | `EmailConverter` | `"user@example.com"` |
+| `CNH` | `CnhConverter` | `"84718735264"` |
 
 All converters serialize as a **plain JSON string** — the canonical unformatted value, never a
 display mask (e.g. `PIS` as `"12345678919"`, not `"123.45678.91-9"`). `Email` is always serialized
@@ -455,6 +501,7 @@ public class Subscriber
     public CEP?       Cep        { get; set; }
     public PIS?       Pis        { get; set; }
     public Email?     Email      { get; set; }
+    public CNH?       Cnh        { get; set; }
 }
 
 // just works — no [JsonConverter] annotations required
