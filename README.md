@@ -285,6 +285,52 @@ CardNumber.IsValid(null);              // false
 
 ---
 
+## PIS
+
+*Programa de Integração Social* — Brazilian worker identification number, also known as NIS (*Número de Identificação Social*) or PASEP (*Patrimônio do Servidor Público*). Issued by Caixa Econômica Federal / DATAPREV.
+
+11 numeric digits with a weighted check digit (mod 11, weights `3,2,9,8,7,6,5,4,3,2`).
+Display mask: `XXX.XXXXX.XX-X`.
+
+### Creation
+
+```csharp
+var pis = new PIS("12345678919");
+var pis = new PIS("123.45678.91-9"); // mask accepted
+
+PIS pis = "12345678919";  // implicit operator
+PIS? pis = null;          // nullable
+```
+
+| Exception | Condition |
+|---|---|
+| `ArgumentNullException` | `null` passed to constructor |
+| `InvalidOperationException` | `null` assigned via implicit operator — use `PIS?` |
+| `ArgumentOutOfRangeException` | non-numeric or wrong length |
+| `InvalidCastException` | check digit does not match |
+
+### Properties
+
+```csharp
+PIS pis = "12345678919";
+
+Console.WriteLine((string)pis);    // 12345678919
+Console.WriteLine(pis.ToString()); // 123.45678.91-9
+```
+
+### Static helpers
+
+```csharp
+PIS.IsValid("12345678919");      // true
+PIS.IsValid("123.45678.91-9");   // true  (mask accepted)
+PIS.IsValid("12345678910");      // false (wrong check digit)
+PIS.IsValid(null);               // false
+
+PIS.StripMask("123.45678.91-9"); // 12345678919
+```
+
+---
+
 ## CEP
 
 Brazilian postal code (Código de Endereçamento Postal) defined by Correios.
@@ -324,6 +370,55 @@ CEP.IsValid("0131010");     // false (too short)
 CEP.IsValid(null);          // false
 
 CEP.StripMask("01310-100"); // 01310100
+```
+
+---
+
+## Email
+
+Email address validated against a practical subset of RFC 5321/5322.
+Normalized to **lowercase** on construction — leading/trailing whitespace is stripped automatically.
+
+- Local part: up to 64 characters; cannot start or end with `.`; no consecutive dots.
+- Total address: up to 254 characters (RFC 5321).
+- Domain: must contain at least one dot; labels separated by `.` follow standard DNS rules.
+
+### Creation
+
+```csharp
+var email = new Email("user@example.com");
+var email = new Email("User@Example.COM"); // normalized to user@example.com
+
+Email email = "user@example.com"; // implicit operator
+Email? email = null;              // nullable
+```
+
+| Exception | Condition |
+|---|---|
+| `ArgumentNullException` | `null` passed to constructor |
+| `InvalidOperationException` | `null` assigned via implicit operator — use `Email?` |
+| `ArgumentOutOfRangeException` | invalid format, local part > 64 chars, or total > 254 chars |
+
+### Properties
+
+```csharp
+Email email = "user.name@example.com.br";
+
+Console.WriteLine((string)email);    // user.name@example.com.br
+Console.WriteLine(email.ToString()); // user.name@example.com.br
+Console.WriteLine(email.Local);      // user.name
+Console.WriteLine(email.Domain);     // example.com.br
+```
+
+### Static helpers
+
+```csharp
+Email.IsValid("user@example.com");      // true
+Email.IsValid("User@Example.COM");      // true  (case-insensitive)
+Email.IsValid("user@example");          // false (no dot in domain)
+Email.IsValid(".user@example.com");     // false (local starts with dot)
+Email.IsValid("user..name@example.com");// false (consecutive dots)
+Email.IsValid(null);                    // false
 ```
 
 ---
@@ -375,7 +470,7 @@ CNH.StripMask("  84718735264  "); // 84718735264
 
 ## JSON converters
 
-All seven value objects carry a `[JsonConverter]` attribute on the struct itself.
+All nine value objects carry a `[JsonConverter]` attribute on the struct itself.
 `System.Text.Json` discovers the converter automatically — no property annotation
 or `options.Converters.Add()` call is needed.
 
@@ -387,10 +482,13 @@ or `options.Converters.Add()` call is needed.
 | `LandLine` | `LandLineConverter` | `"555136352520"` |
 | `CardNumber` | `CardNumberConverter` | `"4929622041254286"` |
 | `CEP` | `CepConverter` | `"01310100"` |
+| `PIS` | `PisConverter` | `"12345678919"` |
+| `Email` | `EmailConverter` | `"user@example.com"` |
 | `CNH` | `CnhConverter` | `"84718735264"` |
 
-All converters serialize as a **plain JSON string** — the canonical digit form, never the
-formatted mask (e.g. `123.456.789-09`).
+All converters serialize as a **plain JSON string** — the canonical unformatted value, never a
+display mask (e.g. `PIS` as `"12345678919"`, not `"123.45678.91-9"`). `Email` is always serialized
+in normalized (lowercase) form, regardless of the original casing used when the object was created.
 
 ```csharp
 public class Subscriber
@@ -401,6 +499,8 @@ public class Subscriber
     public LandLine?  LandLine   { get; set; }
     public CardNumber CardNumber { get; set; }
     public CEP?       Cep        { get; set; }
+    public PIS?       Pis        { get; set; }
+    public Email?     Email      { get; set; }
     public CNH?       Cnh        { get; set; }
 }
 
