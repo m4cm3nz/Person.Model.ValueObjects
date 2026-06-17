@@ -73,7 +73,7 @@ namespace Person.Model.ValueObjects
         /// <summary>Returns the email address in normalized form (lowercase).</summary>
         public override string ToString() => _raw ?? string.Empty;
 
-        public static implicit operator string(Email email) => email._raw;
+        public static implicit operator string(Email email) => email._raw ?? string.Empty;
 
         /// <exception cref="InvalidOperationException">
         /// Thrown when <see langword="null"/> is assigned via implicit conversion.

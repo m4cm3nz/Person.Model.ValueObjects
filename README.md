@@ -440,8 +440,9 @@ or `options.Converters.Add()` call is needed.
 | `PIS` | `PisConverter` | `"12345678919"` |
 | `Email` | `EmailConverter` | `"user@example.com"` |
 
-All converters serialize as a **plain JSON string**. `Email` is always serialized in normalized
-(lowercase) form, regardless of the original casing used when the object was created.
+All converters serialize as a **plain JSON string** — the canonical unformatted value, never a
+display mask (e.g. `PIS` as `"12345678919"`, not `"123.45678.91-9"`). `Email` is always serialized
+in normalized (lowercase) form, regardless of the original casing used when the object was created.
 
 ```csharp
 public class Subscriber

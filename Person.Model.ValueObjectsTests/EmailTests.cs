@@ -121,6 +121,15 @@ namespace Person.Model.ValueObjects.Tests
             Assert.That(result, Is.EqualTo(value));
         }
 
+        [Test]
+        public void DefaultEmailImplicitConversionToStringReturnsEmptyTest()
+        {
+            Email email = default;
+            string result = email;
+
+            Assert.That(result, Is.EqualTo(string.Empty));
+        }
+
         // ------------------------------------------------------------------ //
         // IsValid                                                              //
         // ------------------------------------------------------------------ //
