@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/m4cm3nz/Person.Model.ValueObjects/actions/workflows/ci.yml/badge.svg)](https://github.com/m4cm3nz/Person.Model.ValueObjects/actions/workflows/ci.yml)
 [![Live demo](https://img.shields.io/badge/demo-playground-594ae2)](https://m4cm3nz.github.io/Person.Model.ValueObjects/)
+[![Buy me a coffee](https://img.shields.io/badge/buy%20me%20a%20coffee-support-ffdd00?logo=buymeacoffee&logoColor=000)](https://buymeacoffee.com/rmcmenzc)
 
 A .NET 10.0 collection of value objects for modelling Brazilian person domain properties.
 
@@ -562,3 +563,11 @@ The project lives in [`Person.Model.ValueObjects.Playground/`](Person.Model.Valu
 and references the library directly, so it always reflects real behaviour. It is published to GitHub
 Pages on every push to `master` by [`.github/workflows/pages.yml`](.github/workflows/pages.yml). To
 surface a new value object, add an entry to `DemoCatalog`.
+
+---
+
+## Support
+
+If this package saved you time, consider buying me a coffee ☕ — it helps keep the project maintained.
+
+**[☕ Buy me a coffee](https://buymeacoffee.com/rmcmenzc)**
