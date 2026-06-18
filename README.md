@@ -539,3 +539,26 @@ JsonSerializer.Deserialize<CPF>("null");  // JsonException
 >   Property-level `[JsonConverter(typeof(LandLineConverter))]` annotations remain valid
 >   but are no longer needed.
 > - `CpfConverter` and `CnpjConverter` are new in v10.
+
+---
+
+## Playground
+
+A **Blazor WebAssembly** playground runs the real package in your browser — for every value object
+it shows validation, the `ToString()` mask, the decomposed properties, the serialized JSON, and the
+exception thrown on invalid input.
+
+**🔗 Live demo:** https://m4cm3nz.github.io/Person.Model.ValueObjects/
+
+Run it locally:
+
+```bash
+dotnet run --project Person.Model.ValueObjects.Playground
+```
+
+Then open <http://localhost:5008>.
+
+The project lives in [`Person.Model.ValueObjects.Playground/`](Person.Model.ValueObjects.Playground)
+and references the library directly, so it always reflects real behaviour. It is published to GitHub
+Pages on every push to `master` by [`.github/workflows/pages.yml`](.github/workflows/pages.yml). To
+surface a new value object, add an entry to `DemoCatalog`.
