@@ -1,8 +1,11 @@
 # Person.Model.ValueObjects
 
 [![CI](https://github.com/m4cm3nz/Person.Model.ValueObjects/actions/workflows/ci.yml/badge.svg)](https://github.com/m4cm3nz/Person.Model.ValueObjects/actions/workflows/ci.yml)
+[![Live demo](https://img.shields.io/badge/demo-playground-594ae2)](https://m4cm3nz.github.io/Person.Model.ValueObjects/)
 
 A .NET 10.0 collection of value objects for modelling Brazilian person domain properties.
+
+> 🔗 **[Try it live](https://m4cm3nz.github.io/Person.Model.ValueObjects/)** — a Blazor WebAssembly playground that runs the real package in your browser: validate, format, decompose and serialize every value object.
 
 ```csharp
 public class Company

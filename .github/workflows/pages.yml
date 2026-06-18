@@ -1,0 +1,58 @@
+name: Deploy Playground to GitHub Pages
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'Person.Model.ValueObjects.Playground/**'
+      - 'Person.Model.ValueObjects/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment, skipping runs queued between the run in-progress and latest.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Publish playground
+        run: dotnet publish Person.Model.ValueObjects.Playground/Person.Model.ValueObjects.Playground.csproj -c Release -o publish
+
+      - name: Rewrite base href for project page
+        run: sed -i 's|<base href="/" />|<base href="/Person.Model.ValueObjects/" />|' publish/wwwroot/index.html
+
+      - name: Add SPA fallback and disable Jekyll
+        run: |
+          cp publish/wwwroot/index.html publish/wwwroot/404.html
+          touch publish/wwwroot/.nojekyll
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: publish/wwwroot
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
