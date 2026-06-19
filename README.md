@@ -6,6 +6,15 @@
 
 A .NET 10.0 collection of value objects for modelling Brazilian person domain properties.
 
+**Why value objects?** Instead of passing a `CPF` around as a `string`, you model it as a type that
+*cannot exist in an invalid state*: validation happens once, in the constructor, and every method that
+accepts a `Cpf` is guaranteed a valid one. You get rid of primitive obsession, scattered `if`-validation,
+and whole classes of bugs (a CEP assigned to a phone field simply won't compile).
+
+**The tradeoff:** a few more types and a little ceremony at the boundaries (parsing input, serializing
+output). This package absorbs most of that cost for you — implicit string conversions and JSON converters
+are built in.
+
 > 🔗 **[Try it live](https://m4cm3nz.github.io/Person.Model.ValueObjects/)** — a Blazor WebAssembly playground that runs the real package in your browser: validate, format, decompose and serialize every value object.
 
 ```csharp
